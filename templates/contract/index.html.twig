@@ -1,0 +1,503 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Contracts{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="/css/contracts.css">
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="page-header">
+        <h1 class="page-title">Contracts</h1>
+        <button id="addContractBtn" class="btn btn-primary" type="button">+ Add Contract</button>
+    </div>
+
+    <div id="globalAlert" class="alert alert-danger hidden"></div>
+
+    <div class="contracts-wrapper">
+        <div class="contracts-list">
+            <!-- Column headers -->
+            <div class="contracts-row contracts-header">
+                <div class="contracts-col">Number</div>
+                <div class="contracts-col">Issued</div>
+                <div class="contracts-col">Signed</div>
+                <div class="contracts-col">Amount (EUR)</div>
+                <div class="contracts-col">Licence price (EUR)</div>
+                <div class="contracts-col">Licence since</div>
+                <div class="contracts-col">Subject</div>
+            </div>
+
+            <!-- Contracts list (rendered rows via div) -->
+            <div id="contractsContainer">
+                <div class="contracts-status">Loading contracts...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Contract Modal -->
+<div id="viewModalBackdrop" class="modal-backdrop hidden">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h2 id="viewModalTitle" class="modal-title">Contract</h2>
+            <button type="button" class="btn-close" id="viewModalCloseBtn">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="viewModalAlert" class="alert alert-danger hidden"></div>
+            <div class="property-list">
+                <div class="property-label">ID:</div>
+                <div class="property-value" id="viewId">—</div>
+
+                <div class="property-label">Number:</div>
+                <div class="property-value" id="viewNumber">—</div>
+
+                <div class="property-label">Customer:</div>
+                <div class="property-value" id="viewCustomer">—</div>
+
+                <div class="property-label">Subject:</div>
+                <div class="property-value" id="viewSubject">—</div>
+
+                <div class="property-label">Issued date:</div>
+                <div class="property-value" id="viewIssued">—</div>
+
+                <div class="property-label">Signed date:</div>
+                <div class="property-value" id="viewSigned">—</div>
+
+                <div class="property-label">Amount (EUR):</div>
+                <div class="property-value" id="viewAmountEur">—</div>
+
+                <div class="property-label">Licence price (EUR):</div>
+                <div class="property-value" id="viewLicencePriceEur">—</div>
+
+                <div class="property-label">Licence valid since:</div>
+                <div class="property-value" id="viewLicenceSince">—</div>
+
+                <div class="property-label">Linked invoices:</div>
+                <div class="property-value" id="viewInvoicesCount">—</div>
+
+                <div class="property-label">Note:</div>
+                <div class="property-value" id="viewNote">—</div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="viewModalEditBtn">Edit</button>
+            <button type="button" class="btn btn-danger" id="viewModalDeleteBtn">Delete</button>
+            <button type="button" class="btn btn-secondary" id="viewModalCloseFooterBtn">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Create / Edit Contract Modal -->
+<div id="formModalBackdrop" class="modal-backdrop hidden">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h2 id="formModalTitle" class="modal-title">Add Contract</h2>
+            <button type="button" class="btn-close" id="formModalCloseBtn">&times;</button>
+        </div>
+        <form id="contractForm">
+            <div class="modal-body">
+                <div id="formModalAlert" class="alert alert-danger hidden"></div>
+                <input type="hidden" id="formContractId" value="">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="formNumber">Contract number <span class="required">*</span></label>
+                        <input type="text" id="formNumber" class="form-control" required placeholder="e.g. 123/2026">
+                    </div>
+                    <div class="form-group">
+                        <label for="formCustomer">Customer <span class="required">*</span></label>
+                        <input type="text" id="formCustomer" class="form-control" required placeholder="Customer name">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="formIssued">Issued date <span class="required">*</span></label>
+                        <input type="date" id="formIssued" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="formSigned">Signed date</label>
+                        <input type="date" id="formSigned" class="form-control">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="formAmountEur">Amount in EUR <span class="required">*</span></label>
+                        <input type="number" step="0.01" min="0" id="formAmountEur" class="form-control" required placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="formLicencePriceEur">Licence price in EUR</label>
+                        <input type="number" step="0.01" min="0" id="formLicencePriceEur" class="form-control" placeholder="0.00">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="formLicenceSince">Licence valid since</label>
+                    <input type="date" id="formLicenceSince" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="formSubject">Subject <span class="required">*</span></label>
+                    <input type="text" id="formSubject" class="form-control" required placeholder="Brief description of subject">
+                </div>
+
+                <div class="form-group">
+                    <label for="formNote">Note</label>
+                    <textarea id="formNote" class="form-control" rows="3" placeholder="Additional information"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="formModalCancelBtn">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="formModalSaveBtn">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    let currentViewingContract = null;
+
+    const contractsContainer = document.getElementById('contractsContainer');
+    const globalAlert = document.getElementById('globalAlert');
+
+    const viewModalBackdrop = document.getElementById('viewModalBackdrop');
+    const formModalBackdrop = document.getElementById('formModalBackdrop');
+
+    const formModalAlert = document.getElementById('formModalAlert');
+    const contractForm = document.getElementById('contractForm');
+
+    function syncBodyScrollLock() {
+        const isAnyModalOpen = !viewModalBackdrop.classList.contains('hidden') || !formModalBackdrop.classList.contains('hidden');
+        if (isAnyModalOpen) {
+            document.body.classList.add('modal-open');
+        } else {
+            document.body.classList.remove('modal-open');
+        }
+    }
+
+    // Formatting helpers
+    function formatValue(val) {
+        if (val === null || val === undefined || val === '') {
+            return '—';
+        }
+        return String(val);
+    }
+
+    function formatCurrency(val) {
+        if (val === null || val === undefined || val === '') {
+            return '—';
+        }
+        return `${Number(val).toFixed(2)} €`;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function showGlobalAlert(message) {
+        globalAlert.textContent = message;
+        globalAlert.classList.remove('hidden');
+    }
+
+    function hideGlobalAlert() {
+        globalAlert.textContent = '';
+        globalAlert.classList.add('hidden');
+    }
+
+    function showFormAlert(message) {
+        formModalAlert.innerHTML = message;
+        formModalAlert.classList.remove('hidden');
+    }
+
+    function hideFormAlert() {
+        formModalAlert.innerHTML = '';
+        formModalAlert.classList.add('hidden');
+    }
+
+    // Load contracts list
+    async function loadContracts() {
+        hideGlobalAlert();
+        contractsContainer.innerHTML = '<div class="contracts-status">Loading contracts...</div>';
+
+        try {
+            // Use existing API capabilities: default sort by -issued (from newest to oldest)
+            const response = await fetch('/api/contracts?sort=-issued&pageSize=100');
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.error || `HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+            const items = data.items || [];
+
+            if (items.length === 0) {
+                contractsContainer.innerHTML = '<div class="contracts-status">No contracts found</div>';
+                return;
+            }
+
+            contractsContainer.innerHTML = '';
+            items.forEach(contract => {
+                const row = document.createElement('div');
+                row.className = 'contracts-row contract-item';
+                row.setAttribute('data-id', contract.id);
+
+                row.innerHTML = `
+                    <div class="contracts-col"><strong>${escapeHtml(formatValue(contract.number))}</strong></div>
+                    <div class="contracts-col">${escapeHtml(formatValue(contract.issued))}</div>
+                    <div class="contracts-col">${escapeHtml(formatValue(contract.signed))}</div>
+                    <div class="contracts-col">${escapeHtml(formatCurrency(contract.amountEur))}</div>
+                    <div class="contracts-col">${escapeHtml(formatCurrency(contract.licencePriceEur))}</div>
+                    <div class="contracts-col">${escapeHtml(formatValue(contract.licenceSince))}</div>
+                    <div class="contracts-col">${escapeHtml(formatValue(contract.subject))}</div>
+                `;
+
+                // Clicking row opens view details
+                row.addEventListener('click', () => {
+                    openViewModal(contract.id);
+                });
+
+                contractsContainer.appendChild(row);
+            });
+        } catch (error) {
+            contractsContainer.innerHTML = `<div class="contracts-status" style="color: #dc3545;">Failed to load contracts: ${escapeHtml(error.message)}</div>`;
+        }
+    }
+
+    // View contract details
+    async function openViewModal(id) {
+        document.getElementById('viewModalAlert').classList.add('hidden');
+        document.getElementById('viewInvoicesCount').textContent = 'Loading...';
+
+        try {
+            const [contractRes, invoicesRes] = await Promise.all([
+                fetch(`/api/contracts/${id}`),
+                fetch(`/api/invoices?filter[contract][eq]=${id}&pageSize=1`)
+            ]);
+
+            if (!contractRes.ok) {
+                const err = await contractRes.json().catch(() => ({}));
+                throw new Error(err.error || 'Failed to load contract details');
+            }
+
+            const contract = await contractRes.json();
+            currentViewingContract = contract;
+
+            let invoiceCount = '0';
+            if (invoicesRes.ok) {
+                const invoicesData = await invoicesRes.json();
+                invoiceCount = String(invoicesData.total ?? 0);
+            }
+
+            document.getElementById('viewModalTitle').textContent = `Contract No. ${contract.number || ''}`;
+            document.getElementById('viewId').textContent = formatValue(contract.id);
+            document.getElementById('viewNumber').textContent = formatValue(contract.number);
+            document.getElementById('viewCustomer').textContent = formatValue(contract.customer);
+            document.getElementById('viewSubject').textContent = formatValue(contract.subject);
+            document.getElementById('viewIssued').textContent = formatValue(contract.issued);
+            document.getElementById('viewSigned').textContent = formatValue(contract.signed);
+            document.getElementById('viewAmountEur').textContent = formatCurrency(contract.amountEur);
+            document.getElementById('viewLicencePriceEur').textContent = formatCurrency(contract.licencePriceEur);
+            document.getElementById('viewLicenceSince').textContent = formatValue(contract.licenceSince);
+            document.getElementById('viewInvoicesCount').textContent = invoiceCount;
+            document.getElementById('viewNote').textContent = formatValue(contract.note);
+
+            viewModalBackdrop.classList.remove('hidden');
+            syncBodyScrollLock();
+        } catch (error) {
+            alert(`Failed to open contract: ${error.message}`);
+        }
+    }
+
+    function closeViewModal() {
+        viewModalBackdrop.classList.add('hidden');
+        currentViewingContract = null;
+        syncBodyScrollLock();
+    }
+
+    // Open create modal
+    function openAddModal() {
+        hideFormAlert();
+        contractForm.reset();
+        document.getElementById('formContractId').value = '';
+        document.getElementById('formModalTitle').textContent = 'Add Contract';
+        formModalBackdrop.classList.remove('hidden');
+        syncBodyScrollLock();
+    }
+
+    // Open edit modal
+    async function openEditModal(id) {
+        hideFormAlert();
+        contractForm.reset();
+
+        try {
+            const res = await fetch(`/api/contracts/${id}`);
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || 'Contract not found');
+            }
+
+            const contract = await res.json();
+
+            document.getElementById('formContractId').value = contract.id;
+            document.getElementById('formNumber').value = contract.number || '';
+            document.getElementById('formCustomer').value = contract.customer || '';
+            document.getElementById('formIssued').value = contract.issued || '';
+            document.getElementById('formSigned').value = contract.signed || '';
+            document.getElementById('formAmountEur').value = contract.amountEur || '';
+            document.getElementById('formLicencePriceEur').value = contract.licencePriceEur || '';
+            document.getElementById('formLicenceSince').value = contract.licenceSince || '';
+            document.getElementById('formSubject').value = contract.subject || '';
+            document.getElementById('formNote').value = contract.note || '';
+
+            document.getElementById('formModalTitle').textContent = `Edit Contract No. ${contract.number || id}`;
+            formModalBackdrop.classList.remove('hidden');
+            syncBodyScrollLock();
+        } catch (error) {
+            alert(`Failed to load contract for editing: ${error.message}`);
+        }
+    }
+
+    function closeFormModal() {
+        formModalBackdrop.classList.add('hidden');
+        syncBodyScrollLock();
+    }
+
+    // Save contract (POST / PATCH)
+    contractForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideFormAlert();
+
+        const id = document.getElementById('formContractId').value;
+        const isEdit = Boolean(id);
+
+        const numberVal = document.getElementById('formNumber').value.trim();
+        const customerVal = document.getElementById('formCustomer').value.trim();
+        const issuedVal = document.getElementById('formIssued').value;
+        const signedVal = document.getElementById('formSigned').value;
+        const amountEurVal = document.getElementById('formAmountEur').value.trim();
+        const licencePriceEurVal = document.getElementById('formLicencePriceEur').value.trim();
+        const licenceSinceVal = document.getElementById('formLicenceSince').value;
+        const subjectVal = document.getElementById('formSubject').value.trim();
+        const noteVal = document.getElementById('formNote').value.trim();
+
+        const payload = {
+            number: numberVal,
+            customer: customerVal,
+            issued: issuedVal,
+            amountEur: amountEurVal,
+            subject: subjectVal,
+            signed: signedVal ? signedVal : null,
+            licencePriceEur: licencePriceEurVal ? licencePriceEurVal : null,
+            licenceSince: licenceSinceVal ? licenceSinceVal : null,
+            note: noteVal ? noteVal : null,
+        };
+
+        const url = isEdit ? `/api/contracts/${id}` : '/api/contracts';
+        const method = isEdit ? 'PATCH' : 'POST';
+
+        try {
+            const res = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({ error: 'Unknown server error' }));
+                let msg = errData.error || 'Failed to save contract data';
+                if (Array.isArray(errData.violations) && errData.violations.length > 0) {
+                    const details = errData.violations.map(v => `• <strong>${escapeHtml(v.field)}</strong>: ${escapeHtml(v.message)}`).join('<br>');
+                    msg += `<br><div style="margin-top: 6px;">${details}</div>`;
+                }
+                showFormAlert(msg);
+                return;
+            }
+
+            closeFormModal();
+            closeViewModal();
+            await loadContracts();
+        } catch (error) {
+            showFormAlert(`Network or server error: ${escapeHtml(error.message)}`);
+        }
+    });
+
+    // Delete contract
+    async function deleteContract(id, number) {
+        const confirmMsg = number
+            ? `Are you sure you want to delete contract No. "${number}"?`
+            : 'Are you sure you want to delete this contract?';
+
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/contracts/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (res.status === 204) {
+                closeViewModal();
+                await loadContracts();
+                return;
+            }
+
+            const errData = await res.json().catch(() => ({}));
+            const errorMsg = errData.error || `Failed to delete contract (HTTP ${res.status})`;
+            alert(`Deletion error: ${errorMsg}`);
+        } catch (error) {
+            alert(`Network error during deletion: ${error.message}`);
+        }
+    }
+
+    // Event listeners
+    document.getElementById('addContractBtn').addEventListener('click', openAddModal);
+
+    // Modal close buttons
+    document.getElementById('viewModalCloseBtn').addEventListener('click', closeViewModal);
+    document.getElementById('viewModalCloseFooterBtn').addEventListener('click', closeViewModal);
+    document.getElementById('formModalCloseBtn').addEventListener('click', closeFormModal);
+    document.getElementById('formModalCancelBtn').addEventListener('click', closeFormModal);
+
+    // Backdrop clicks
+    viewModalBackdrop.addEventListener('click', (e) => {
+        if (e.target === viewModalBackdrop) closeViewModal();
+    });
+    formModalBackdrop.addEventListener('click', (e) => {
+        if (e.target === formModalBackdrop) closeFormModal();
+    });
+
+    // Actions inside view modal
+    document.getElementById('viewModalEditBtn').addEventListener('click', () => {
+        if (currentViewingContract) {
+            const id = currentViewingContract.id;
+            closeViewModal();
+            openEditModal(id);
+        }
+    });
+
+    document.getElementById('viewModalDeleteBtn').addEventListener('click', () => {
+        if (currentViewingContract) {
+            deleteContract(currentViewingContract.id, currentViewingContract.number);
+        }
+    });
+
+    // Initial load
+    loadContracts();
+});
+</script>
+{% endblock %}
