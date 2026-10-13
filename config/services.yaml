@@ -21,3 +21,19 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    App\ArgumentResolver\PageArgumentResolver:
+        tags:
+            - { name: controller.argument_value_resolver, priority: 50 }
+
+    App\ArgumentResolver\SortArgumentResolver:
+        tags:
+            - { name: controller.argument_value_resolver, priority: 50 }
+
+    App\ArgumentResolver\FilterArgumentResolver:
+        tags:
+            - { name: controller.argument_value_resolver, priority: 50 }
+
+    App\EventListener\ApiExceptionListener:
+        arguments:
+            $debug: '%kernel.debug%'
