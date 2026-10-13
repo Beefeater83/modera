@@ -16,6 +16,56 @@ body.modal-open {
     overflow: hidden;
 }
 
+/* Navigation bar */
+.app-nav {
+    background-color: #212529;
+    color: #fff;
+    padding: 0 16px;
+    border-bottom: 1px solid #343a40;
+}
+
+.nav-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    height: 54px;
+    gap: 24px;
+}
+
+.nav-brand {
+    font-weight: 700;
+    font-size: 18px;
+    color: #fff;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 8px;
+}
+
+.nav-link {
+    color: #adb5bd;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.15s, background-color 0.15s;
+}
+
+.nav-link:hover {
+    color: #fff;
+    background-color: #343a40;
+}
+
+.nav-link.active {
+    color: #fff;
+    background-color: #0d6efd;
+}
+
 .container {
     max-width: 1280px;
     margin: 0 auto;

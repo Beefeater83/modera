@@ -18,6 +18,18 @@
         {% endif %}
     </head>
     <body>
+        {% block navigation %}
+        <nav class="app-nav">
+            <div class="nav-container">
+                <a href="/contracts" class="nav-brand">Modera</a>
+                <div class="nav-links">
+                    <a href="/contracts" class="nav-link {% if app.request.pathInfo starts with '/contracts' %}active{% endif %}">Contracts</a>
+                    <a href="/invoices" class="nav-link {% if app.request.pathInfo starts with '/invoices' %}active{% endif %}">Invoices</a>
+                </div>
+            </div>
+        </nav>
+        {% endblock %}
+
         {% block body %}{% endblock %}
     </body>
 </html>

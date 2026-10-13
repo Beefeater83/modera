@@ -1,0 +1,619 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Invoices{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="/css/invoices.css">
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="page-header">
+        <h1 class="page-title">Invoices</h1>
+        <button id="addInvoiceBtn" class="btn btn-primary" type="button">+ Add Invoice</button>
+    </div>
+
+    <div id="globalAlert" class="alert alert-danger hidden"></div>
+
+    <div class="invoices-wrapper">
+        <div class="invoices-list">
+            <!-- Column headers (11 columns in exact required order) -->
+            <div class="invoices-row invoices-header">
+                <div class="invoices-col">Number</div>
+                <div class="invoices-col">Issued</div>
+                <div class="invoices-col">Price (EUR)</div>
+                <div class="invoices-col">Quantity</div>
+                <div class="invoices-col">Amount (EUR)</div>
+                <div class="invoices-col">FX Rate</div>
+                <div class="invoices-col">UAH excl. VAT</div>
+                <div class="invoices-col">VAT (UAH)</div>
+                <div class="invoices-col">Total (UAH)</div>
+                <div class="invoices-col">Nomenclature</div>
+                <div class="invoices-col">Status</div>
+            </div>
+
+            <!-- Invoices list rows -->
+            <div id="invoicesContainer">
+                <div class="invoices-status">Loading invoices...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Invoice Modal -->
+<div id="viewModalBackdrop" class="modal-backdrop hidden">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h2 id="viewModalTitle" class="modal-title">Invoice</h2>
+            <button type="button" class="btn-close" id="viewModalCloseBtn">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="viewModalAlert" class="alert alert-danger hidden"></div>
+
+            <div class="detail-section-title">Invoice Details</div>
+            <div class="property-list">
+                <div class="property-label">ID:</div>
+                <div class="property-value" id="viewId">—</div>
+
+                <div class="property-label">Invoice number:</div>
+                <div class="property-value" id="viewNumber">—</div>
+
+                <div class="property-label">Payment status:</div>
+                <div class="property-value" id="viewStatus">—</div>
+
+                <div class="property-label">Payment date:</div>
+                <div class="property-value" id="viewPaidAt">—</div>
+
+                <div class="property-label">Issued date:</div>
+                <div class="property-value" id="viewIssued">—</div>
+
+                <div class="property-label">Price in EUR:</div>
+                <div class="property-value" id="viewPriceEur">—</div>
+
+                <div class="property-label">Quantity:</div>
+                <div class="property-value" id="viewQuantity">—</div>
+
+                <div class="property-label">Total amount in EUR:</div>
+                <div class="property-value" id="viewAmountEur">—</div>
+
+                <div class="property-label">Exchange rate (EUR/UAH):</div>
+                <div class="property-value" id="viewExchangeRate">—</div>
+
+                <div class="property-label">Amount in UAH excl. VAT:</div>
+                <div class="property-value" id="viewAmountUahExclVat">—</div>
+
+                <div class="property-label">VAT amount (UAH):</div>
+                <div class="property-value" id="viewVatAmount">—</div>
+
+                <div class="property-label">Total amount in UAH:</div>
+                <div class="property-value" id="viewAmountUah">—</div>
+
+                <div class="property-label">Nomenclature:</div>
+                <div class="property-value" id="viewNomenclature">—</div>
+
+                <div class="property-label">Note:</div>
+                <div class="property-value" id="viewNote">—</div>
+            </div>
+
+            <div class="detail-section-title">Associated Contract</div>
+            <div class="property-list">
+                <div class="property-label">Contract number:</div>
+                <div class="property-value" id="viewContractNumber">Loading...</div>
+
+                <div class="property-label">Contract issue date:</div>
+                <div class="property-value" id="viewContractIssued">—</div>
+
+                <div class="property-label">Contract subject:</div>
+                <div class="property-value" id="viewContractSubject">—</div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="viewModalEditBtn">Edit</button>
+            <button type="button" class="btn btn-danger" id="viewModalDeleteBtn">Delete</button>
+            <button type="button" class="btn btn-secondary" id="viewModalCloseFooterBtn">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Create / Edit Invoice Modal -->
+<div id="formModalBackdrop" class="modal-backdrop hidden">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h2 id="formModalTitle" class="modal-title">Add Invoice</h2>
+            <button type="button" class="btn-close" id="formModalCloseBtn">&times;</button>
+        </div>
+        <form id="invoiceForm">
+            <div class="modal-body">
+                <div id="formModalAlert" class="alert alert-danger hidden"></div>
+                <input type="hidden" id="formInvoiceId" value="">
+
+                <div class="form-group">
+                    <label for="formContract">Associated Contract <span class="required">*</span></label>
+                    <select id="formContract" class="form-control" required>
+                        <option value="">Select contract...</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="formNumber">Invoice number <span class="required">*</span></label>
+                        <input type="text" id="formNumber" class="form-control" required placeholder="e.g. INV-2026-001">
+                    </div>
+                    <div class="form-group">
+                        <label for="formIssued">Issued date <span class="required">*</span></label>
+                        <input type="date" id="formIssued" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label for="formPriceEur">Price (EUR) <span class="required">*</span></label>
+                        <input type="number" step="0.01" min="0.01" id="formPriceEur" class="form-control" required placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="formQuantity">Quantity <span class="required">*</span></label>
+                        <input type="number" step="0.1" min="0.1" id="formQuantity" class="form-control" required placeholder="1.0">
+                    </div>
+                    <div class="form-group">
+                        <label for="formAmountUahExclVat">UAH excl. VAT <span class="required">*</span></label>
+                        <input type="number" step="0.01" min="0" id="formAmountUahExclVat" class="form-control" required placeholder="0.00">
+                    </div>
+                </div>
+
+                <span class="form-help" style="margin-bottom: 16px;">
+                    * Derived amounts (Amount in EUR, Exchange rate, VAT, and Total UAH) are automatically calculated on the server.
+                </span>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="formPaidAt">Payment date</label>
+                        <input type="date" id="formPaidAt" class="form-control">
+                        <span class="form-help">Leave empty for unpaid (Debt) status.</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="formNomenclature">Nomenclature <span class="required">*</span></label>
+                        <input type="text" id="formNomenclature" class="form-control" required placeholder="Item / service description">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="formNote">Note</label>
+                    <textarea id="formNote" class="form-control" rows="3" placeholder="Additional notes"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="formModalCancelBtn">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="formModalSaveBtn">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    let currentViewingInvoice = null;
+    let availableContracts = [];
+
+    const invoicesContainer = document.getElementById('invoicesContainer');
+    const globalAlert = document.getElementById('globalAlert');
+
+    const viewModalBackdrop = document.getElementById('viewModalBackdrop');
+    const formModalBackdrop = document.getElementById('formModalBackdrop');
+
+    const formModalAlert = document.getElementById('formModalAlert');
+    const invoiceForm = document.getElementById('invoiceForm');
+    const formContractSelect = document.getElementById('formContract');
+
+    function syncBodyScrollLock() {
+        const isAnyModalOpen = !viewModalBackdrop.classList.contains('hidden') || !formModalBackdrop.classList.contains('hidden');
+        if (isAnyModalOpen) {
+            document.body.classList.add('modal-open');
+        } else {
+            document.body.classList.remove('modal-open');
+        }
+    }
+
+    // Formatting helpers
+    function formatValue(val) {
+        if (val === null || val === undefined || val === '') {
+            return '—';
+        }
+        return String(val);
+    }
+
+    function formatCurrencyEur(val) {
+        if (val === null || val === undefined || val === '') {
+            return '—';
+        }
+        return `${Number(val).toFixed(2)} €`;
+    }
+
+    function formatCurrencyUah(val) {
+        if (val === null || val === undefined || val === '') {
+            return '—';
+        }
+        return `${Number(val).toFixed(2)} ₴`;
+    }
+
+    function formatQuantity(val) {
+        if (val === null || val === undefined || val === '') {
+            return '—';
+        }
+        return Number(val).toFixed(1);
+    }
+
+    function formatRate(val) {
+        if (val === null || val === undefined || val === '') {
+            return '—';
+        }
+        return Number(val).toFixed(2);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function renderStatusBadge(paidAt) {
+        if (paidAt !== null && paidAt !== undefined && paidAt !== '') {
+            return '<span class="status-badge status-paid">Paid</span>';
+        }
+        return '<span class="status-badge status-debt">Debt</span>';
+    }
+
+    function showGlobalAlert(message) {
+        globalAlert.textContent = message;
+        globalAlert.classList.remove('hidden');
+    }
+
+    function hideGlobalAlert() {
+        globalAlert.textContent = '';
+        globalAlert.classList.add('hidden');
+    }
+
+    function showFormAlert(message) {
+        formModalAlert.innerHTML = message;
+        formModalAlert.classList.remove('hidden');
+    }
+
+    function hideFormAlert() {
+        formModalAlert.innerHTML = '';
+        formModalAlert.classList.add('hidden');
+    }
+
+    // Preload contracts for form selection
+    async function loadContractsOptions() {
+        try {
+            const res = await fetch('/api/contracts?pageSize=100&sort=-issued');
+            if (res.ok) {
+                const data = await res.json();
+                availableContracts = data.items || [];
+                populateContractSelect();
+            }
+        } catch (e) {
+            console.error('Failed to load contracts options', e);
+        }
+    }
+
+    function populateContractSelect(selectedId = null) {
+        formContractSelect.innerHTML = '<option value="">Select contract...</option>';
+        availableContracts.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = `No. ${c.number || c.id} — ${c.subject || 'No subject'} (${c.customer || ''})`;
+            if (selectedId && Number(c.id) === Number(selectedId)) {
+                opt.selected = true;
+            }
+            formContractSelect.appendChild(opt);
+        });
+    }
+
+    // Load invoices list
+    async function loadInvoices() {
+        hideGlobalAlert();
+        invoicesContainer.innerHTML = '<div class="invoices-status">Loading invoices...</div>';
+
+        try {
+            // Default sorting: issued descending (newest first)
+            const response = await fetch('/api/invoices?sort=-issued&pageSize=100');
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.error || `HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+            const items = data.items || [];
+
+            if (items.length === 0) {
+                invoicesContainer.innerHTML = '<div class="invoices-status">No invoices found</div>';
+                return;
+            }
+
+            invoicesContainer.innerHTML = '';
+            items.forEach(invoice => {
+                const row = document.createElement('div');
+                row.className = 'invoices-row invoice-item';
+                row.setAttribute('data-id', invoice.id);
+
+                row.innerHTML = `
+                    <div class="invoices-col"><strong>${escapeHtml(formatValue(invoice.number))}</strong></div>
+                    <div class="invoices-col">${escapeHtml(formatValue(invoice.issued))}</div>
+                    <div class="invoices-col">${escapeHtml(formatCurrencyEur(invoice.priceEur))}</div>
+                    <div class="invoices-col">${escapeHtml(formatQuantity(invoice.quantity))}</div>
+                    <div class="invoices-col">${escapeHtml(formatCurrencyEur(invoice.amountEur))}</div>
+                    <div class="invoices-col">${escapeHtml(formatRate(invoice.exchangeRate))}</div>
+                    <div class="invoices-col">${escapeHtml(formatCurrencyUah(invoice.amountUahExclVat))}</div>
+                    <div class="invoices-col">${escapeHtml(formatCurrencyUah(invoice.vatAmount))}</div>
+                    <div class="invoices-col">${escapeHtml(formatCurrencyUah(invoice.amountUah))}</div>
+                    <div class="invoices-col">${escapeHtml(formatValue(invoice.nomenclature))}</div>
+                    <div class="invoices-col">${renderStatusBadge(invoice.paidAt)}</div>
+                `;
+
+                // Clicking row opens view details
+                row.addEventListener('click', () => {
+                    openViewModal(invoice.id);
+                });
+
+                invoicesContainer.appendChild(row);
+            });
+        } catch (error) {
+            invoicesContainer.innerHTML = `<div class="invoices-status" style="color: #dc3545;">Failed to load invoices: ${escapeHtml(error.message)}</div>`;
+        }
+    }
+
+    // View invoice details
+    async function openViewModal(id) {
+        document.getElementById('viewModalAlert').classList.add('hidden');
+        document.getElementById('viewContractNumber').textContent = 'Loading...';
+        document.getElementById('viewContractIssued').textContent = '—';
+        document.getElementById('viewContractSubject').textContent = '—';
+
+        try {
+            const invoiceRes = await fetch(`/api/invoices/${id}`);
+            if (!invoiceRes.ok) {
+                const err = await invoiceRes.json().catch(() => ({}));
+                throw new Error(err.error || 'Failed to load invoice details');
+            }
+
+            const invoice = await invoiceRes.json();
+            currentViewingInvoice = invoice;
+
+            document.getElementById('viewModalTitle').textContent = `Invoice No. ${invoice.number || ''}`;
+            document.getElementById('viewId').textContent = formatValue(invoice.id);
+            document.getElementById('viewNumber').textContent = formatValue(invoice.number);
+            document.getElementById('viewStatus').innerHTML = renderStatusBadge(invoice.paidAt);
+            document.getElementById('viewPaidAt').textContent = formatValue(invoice.paidAt);
+            document.getElementById('viewIssued').textContent = formatValue(invoice.issued);
+            document.getElementById('viewPriceEur').textContent = formatCurrencyEur(invoice.priceEur);
+            document.getElementById('viewQuantity').textContent = formatQuantity(invoice.quantity);
+            document.getElementById('viewAmountEur').textContent = formatCurrencyEur(invoice.amountEur);
+            document.getElementById('viewExchangeRate').textContent = formatRate(invoice.exchangeRate);
+            document.getElementById('viewAmountUahExclVat').textContent = formatCurrencyUah(invoice.amountUahExclVat);
+            document.getElementById('viewVatAmount').textContent = formatCurrencyUah(invoice.vatAmount);
+            document.getElementById('viewAmountUah').textContent = formatCurrencyUah(invoice.amountUah);
+            document.getElementById('viewNomenclature').textContent = formatValue(invoice.nomenclature);
+            document.getElementById('viewNote').textContent = formatValue(invoice.note);
+
+            // Fetch associated contract details
+            if (invoice.contractId) {
+                fetch(`/api/contracts/${invoice.contractId}`)
+                    .then(res => res.ok ? res.json() : null)
+                    .then(contract => {
+                        if (contract) {
+                            document.getElementById('viewContractNumber').textContent = formatValue(contract.number);
+                            document.getElementById('viewContractIssued').textContent = formatValue(contract.issued);
+                            document.getElementById('viewContractSubject').textContent = formatValue(contract.subject);
+                        } else {
+                            document.getElementById('viewContractNumber').textContent = `Contract ID #${invoice.contractId}`;
+                        }
+                    })
+                    .catch(() => {
+                        document.getElementById('viewContractNumber').textContent = `Contract ID #${invoice.contractId}`;
+                    });
+            } else {
+                document.getElementById('viewContractNumber').textContent = '—';
+            }
+
+            viewModalBackdrop.classList.remove('hidden');
+            syncBodyScrollLock();
+        } catch (error) {
+            alert(`Failed to open invoice: ${error.message}`);
+        }
+    }
+
+    function closeViewModal() {
+        viewModalBackdrop.classList.add('hidden');
+        currentViewingInvoice = null;
+        syncBodyScrollLock();
+    }
+
+    // Open create modal
+    function openAddModal() {
+        hideFormAlert();
+        invoiceForm.reset();
+        document.getElementById('formInvoiceId').value = '';
+        populateContractSelect();
+        document.getElementById('formModalTitle').textContent = 'Add Invoice';
+        formModalBackdrop.classList.remove('hidden');
+        syncBodyScrollLock();
+    }
+
+    // Open edit modal
+    async function openEditModal(id) {
+        hideFormAlert();
+        invoiceForm.reset();
+
+        try {
+            const res = await fetch(`/api/invoices/${id}`);
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || 'Invoice not found');
+            }
+
+            const invoice = await res.json();
+
+            document.getElementById('formInvoiceId').value = invoice.id;
+            populateContractSelect(invoice.contractId);
+            document.getElementById('formNumber').value = invoice.number || '';
+            document.getElementById('formIssued').value = invoice.issued || '';
+            document.getElementById('formPriceEur').value = invoice.priceEur || '';
+            document.getElementById('formQuantity').value = invoice.quantity || '';
+            document.getElementById('formAmountUahExclVat').value = invoice.amountUahExclVat || '';
+            document.getElementById('formPaidAt').value = invoice.paidAt || '';
+            document.getElementById('formNomenclature').value = invoice.nomenclature || '';
+            document.getElementById('formNote').value = invoice.note || '';
+
+            document.getElementById('formModalTitle').textContent = `Edit Invoice No. ${invoice.number || id}`;
+            formModalBackdrop.classList.remove('hidden');
+            syncBodyScrollLock();
+        } catch (error) {
+            alert(`Failed to load invoice for editing: ${error.message}`);
+        }
+    }
+
+    function closeFormModal() {
+        formModalBackdrop.classList.add('hidden');
+        syncBodyScrollLock();
+    }
+
+    // Save invoice (POST / PATCH)
+    invoiceForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideFormAlert();
+
+        const id = document.getElementById('formInvoiceId').value;
+        const isEdit = Boolean(id);
+
+        const contractVal = formContractSelect.value;
+        const numberVal = document.getElementById('formNumber').value.trim();
+        const issuedVal = document.getElementById('formIssued').value;
+        const priceEurVal = document.getElementById('formPriceEur').value.trim();
+        const quantityVal = document.getElementById('formQuantity').value.trim();
+        const amountUahExclVatVal = document.getElementById('formAmountUahExclVat').value.trim();
+        const paidAtVal = document.getElementById('formPaidAt').value;
+        const nomenclatureVal = document.getElementById('formNomenclature').value.trim();
+        const noteVal = document.getElementById('formNote').value.trim();
+
+        if (!contractVal) {
+            showFormAlert('Please select an associated contract.');
+            return;
+        }
+
+        const payload = {
+            contract: Number(contractVal),
+            number: numberVal,
+            issued: issuedVal,
+            priceEur: priceEurVal,
+            quantity: quantityVal,
+            amountUahExclVat: amountUahExclVatVal,
+            nomenclature: nomenclatureVal,
+            paidAt: paidAtVal ? paidAtVal : null,
+            note: noteVal ? noteVal : null
+        };
+
+        const url = isEdit ? `/api/invoices/${id}` : '/api/invoices';
+        const method = isEdit ? 'PATCH' : 'POST';
+
+        try {
+            const res = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({ error: 'Unknown server error' }));
+                let msg = errData.error || 'Failed to save invoice data';
+                if (Array.isArray(errData.violations) && errData.violations.length > 0) {
+                    const details = errData.violations.map(v => `• <strong>${escapeHtml(v.field)}</strong>: ${escapeHtml(v.message)}`).join('<br>');
+                    msg += `<br><div style="margin-top: 6px;">${details}</div>`;
+                }
+                showFormAlert(msg);
+                return;
+            }
+
+            closeFormModal();
+            closeViewModal();
+            await loadInvoices();
+        } catch (error) {
+            showFormAlert(`Network or server error: ${escapeHtml(error.message)}`);
+        }
+    });
+
+    // Delete invoice
+    async function deleteInvoice(id, number) {
+        const confirmMsg = number
+            ? `Are you sure you want to delete invoice No. "${number}"?`
+            : 'Are you sure you want to delete this invoice?';
+
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/invoices/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (res.status === 204) {
+                closeViewModal();
+                await loadInvoices();
+                return;
+            }
+
+            const errData = await res.json().catch(() => ({}));
+            const errorMsg = errData.error || `Failed to delete invoice (HTTP ${res.status})`;
+            alert(`Deletion error: ${errorMsg}`);
+        } catch (error) {
+            alert(`Network error during deletion: ${error.message}`);
+        }
+    }
+
+    // Event listeners
+    document.getElementById('addInvoiceBtn').addEventListener('click', openAddModal);
+
+    // Modal close buttons
+    document.getElementById('viewModalCloseBtn').addEventListener('click', closeViewModal);
+    document.getElementById('viewModalCloseFooterBtn').addEventListener('click', closeViewModal);
+    document.getElementById('formModalCloseBtn').addEventListener('click', closeFormModal);
+    document.getElementById('formModalCancelBtn').addEventListener('click', closeFormModal);
+
+    // Backdrop clicks
+    viewModalBackdrop.addEventListener('click', (e) => {
+        if (e.target === viewModalBackdrop) closeViewModal();
+    });
+    formModalBackdrop.addEventListener('click', (e) => {
+        if (e.target === formModalBackdrop) closeFormModal();
+    });
+
+    // Actions inside view modal
+    document.getElementById('viewModalEditBtn').addEventListener('click', () => {
+        if (currentViewingInvoice) {
+            const id = currentViewingInvoice.id;
+            closeViewModal();
+            openEditModal(id);
+        }
+    });
+
+    document.getElementById('viewModalDeleteBtn').addEventListener('click', () => {
+        if (currentViewingInvoice) {
+            deleteInvoice(currentViewingInvoice.id, currentViewingInvoice.number);
+        }
+    });
+
+    // Initial load
+    loadContractsOptions();
+    loadInvoices();
+});
+</script>
+{% endblock %}
