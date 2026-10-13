@@ -15,10 +15,4 @@ class ContractWebController extends AbstractController
     {
         return $this->render('contract/index.html.twig');
     }
-
-    #[Route('/', name: 'app_home', methods: ['GET'])]
-    public function home(): Response
-    {
-        return $this->redirectToRoute('app_contracts_web');
-    }
 }

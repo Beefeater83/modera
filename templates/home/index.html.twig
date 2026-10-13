@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modera{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="/css/home.css">
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="home-hero">
+        <h1 class="home-title">Modera</h1>
+
+        <!-- Image or animation placeholder area -->
+        <div class="home-media-placeholder">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+            </svg>
+            <div class="home-placeholder-text">Image / Animation Placeholder</div>
+            <div class="home-placeholder-subtext">Content will be added later</div>
+        </div>
+
+        <!-- Authenticate action placeholder -->
+        <div class="home-actions">
+            <button type="button" class="btn btn-primary" id="authenticateBtn">Authenticate</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
