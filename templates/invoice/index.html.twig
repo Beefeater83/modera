@@ -15,11 +15,37 @@
 
     <div id="globalAlert" class="alert alert-danger hidden"></div>
 
+    <!-- Toolbar: date filter + pagination controls -->
+    <div class="invoices-toolbar">
+        <div class="toolbar-section filter-controls">
+            <label class="field-label" for="filterFrom">From:</label>
+            <input type="date" id="filterFrom" class="form-control form-control-sm">
+            <label class="field-label" for="filterTo">To:</label>
+            <input type="date" id="filterTo" class="form-control form-control-sm">
+            <button id="filterApplyBtn" class="btn btn-primary btn-sm">Filter</button>
+            <button id="filterClearBtn" class="btn btn-secondary btn-sm">Clear</button>
+        </div>
+        <div class="toolbar-section pagination-nav">
+            <label class="field-label" for="pageSizeSelect">Per page:</label>
+            <select id="pageSizeSelect" class="form-control form-control-sm">
+                <option value="all" selected>All</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+            <button id="prevPageBtn" class="btn btn-secondary btn-sm" disabled>&laquo; Prev</button>
+            <span id="pageInfo" class="page-info"></span>
+            <button id="nextPageBtn" class="btn btn-secondary btn-sm" disabled>Next &raquo;</button>
+            <span id="totalInfo" class="total-info"></span>
+        </div>
+    </div>
+
     <div class="invoices-wrapper">
         <div class="invoices-list">
-            <!-- Column headers (11 columns in exact required order) -->
+            <!-- Column headers (12 columns in exact required order) -->
             <div class="invoices-row invoices-header">
                 <div class="invoices-col">Number</div>
+                <div class="invoices-col">Contract</div>
                 <div class="invoices-col">Issued</div>
                 <div class="invoices-col">Price (EUR)</div>
                 <div class="invoices-col">Quantity</div>
@@ -28,8 +54,8 @@
                 <div class="invoices-col">UAH excl. VAT</div>
                 <div class="invoices-col">VAT (UAH)</div>
                 <div class="invoices-col">Total (UAH)</div>
-                <div class="invoices-col">Nomenclature</div>
                 <div class="invoices-col">Status</div>
+                <div class="invoices-col">Nomenclature</div>
             </div>
 
             <!-- Invoices list rows -->
@@ -223,18 +249,30 @@ document.addEventListener('DOMContentLoaded', () => {
         return String(val);
     }
 
+    // Format a numeric string with space (non-breaking) thousands separator.
+    // Works on the raw string — does NOT convert to float.
+    function formatMoney(val) {
+        if (val === null || val === undefined || val === '') {
+            return '—';
+        }
+        const s = String(val);
+        const parts = s.split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
+        return parts.join('.');
+    }
+
     function formatCurrencyEur(val) {
         if (val === null || val === undefined || val === '') {
             return '—';
         }
-        return `${Number(val).toFixed(2)} €`;
+        return `${formatMoney(val)} \u20ac`;
     }
 
     function formatCurrencyUah(val) {
         if (val === null || val === undefined || val === '') {
             return '—';
         }
-        return `${Number(val).toFixed(2)} ₴`;
+        return `${formatMoney(val)} \u20b4`;
     }
 
     function formatQuantity(val) {
@@ -248,7 +286,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (val === null || val === undefined || val === '') {
             return '—';
         }
-        return Number(val).toFixed(2);
+        return formatMoney(val);
+    }
+
+    // Convert YYYY-MM-DD to DD.MM.YYYY for display only.
+    function formatDate(val) {
+        if (val === null || val === undefined || val === '') {
+            return '—';
+        }
+        const m = String(val).match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (!m) return String(val);
+        return `${m[3]}.${m[2]}.${m[1]}`;
     }
 
     function escapeHtml(str) {
@@ -312,36 +360,57 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Load invoices list
-    async function loadInvoices() {
-        hideGlobalAlert();
-        invoicesContainer.innerHTML = '<div class="invoices-status">Loading invoices...</div>';
+    // --- Pagination state ---
+    let currentPage = 1;
+    let currentPageSize = 'all'; // 'all' | 25 | 50 | 100
+    let filterFrom = '';
+    let filterTo = '';
+    let totalItems = 0;
 
-        try {
-            // Default sorting: issued descending (newest first)
-            const response = await fetch('/api/invoices?sort=-issued&pageSize=100');
-            if (!response.ok) {
-                const err = await response.json().catch(() => ({}));
-                throw new Error(err.error || `HTTP ${response.status}`);
-            }
+    // Build filter query string fragment (no leading &).
+    function buildFilterQuery() {
+        const parts = [];
+        if (filterFrom) parts.push(`filter[issued][gte]=${encodeURIComponent(filterFrom)}`);
+        if (filterTo)   parts.push(`filter[issued][lte]=${encodeURIComponent(filterTo)}`);
+        return parts.join('&');
+    }
 
-            const data = await response.json();
-            const items = data.items || [];
+    function updatePaginationUI() {
+        const prevBtn = document.getElementById('prevPageBtn');
+        const nextBtn = document.getElementById('nextPageBtn');
+        const pageInfo = document.getElementById('pageInfo');
+        const totalInfo = document.getElementById('totalInfo');
 
-            if (items.length === 0) {
-                invoicesContainer.innerHTML = '<div class="invoices-status">No invoices found</div>';
-                return;
-            }
+        if (currentPageSize === 'all') {
+            prevBtn.disabled = true;
+            nextBtn.disabled = true;
+            pageInfo.textContent = '';
+        } else {
+            const totalPages = Math.ceil(totalItems / currentPageSize) || 1;
+            prevBtn.disabled = currentPage <= 1;
+            nextBtn.disabled = currentPage >= totalPages;
+            pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+        }
+        totalInfo.textContent = totalItems > 0 ? `${totalItems} total` : '';
+    }
 
-            invoicesContainer.innerHTML = '';
-            items.forEach(invoice => {
-                const row = document.createElement('div');
-                row.className = 'invoices-row invoice-item';
-                row.setAttribute('data-id', invoice.id);
+    // Render a list of invoice items into invoicesContainer.
+    function renderInvoices(items) {
+        if (items.length === 0) {
+            invoicesContainer.innerHTML = '<div class="invoices-status">No invoices found</div>';
+            return;
+        }
 
-                row.innerHTML = `
+        invoicesContainer.innerHTML = '';
+        items.forEach(invoice => {
+            const row = document.createElement('div');
+            row.className = 'invoices-row invoice-item';
+            row.setAttribute('data-id', invoice.id);
+
+            row.innerHTML = `
                     <div class="invoices-col"><strong>${escapeHtml(formatValue(invoice.number))}</strong></div>
-                    <div class="invoices-col">${escapeHtml(formatValue(invoice.issued))}</div>
+                    <div class="invoices-col">${escapeHtml(formatValue(invoice.contractSubject))}</div>
+                    <div class="invoices-col">${escapeHtml(formatDate(invoice.issued))}</div>
                     <div class="invoices-col">${escapeHtml(formatCurrencyEur(invoice.priceEur))}</div>
                     <div class="invoices-col">${escapeHtml(formatQuantity(invoice.quantity))}</div>
                     <div class="invoices-col">${escapeHtml(formatCurrencyEur(invoice.amountEur))}</div>
@@ -349,17 +418,71 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="invoices-col">${escapeHtml(formatCurrencyUah(invoice.amountUahExclVat))}</div>
                     <div class="invoices-col">${escapeHtml(formatCurrencyUah(invoice.vatAmount))}</div>
                     <div class="invoices-col">${escapeHtml(formatCurrencyUah(invoice.amountUah))}</div>
-                    <div class="invoices-col">${escapeHtml(formatValue(invoice.nomenclature))}</div>
                     <div class="invoices-col">${renderStatusBadge(invoice.paidAt)}</div>
+                    <div class="invoices-col">${escapeHtml(formatValue(invoice.nomenclature))}</div>
                 `;
 
-                // Clicking row opens view details
-                row.addEventListener('click', () => {
-                    openViewModal(invoice.id);
-                });
-
-                invoicesContainer.appendChild(row);
+            row.addEventListener('click', () => {
+                openViewModal(invoice.id);
             });
+
+            invoicesContainer.appendChild(row);
+        });
+    }
+
+    // Load invoices list
+    async function loadInvoices() {
+        hideGlobalAlert();
+        invoicesContainer.innerHTML = '<div class="invoices-status">Loading invoices...</div>';
+
+        const filterQuery = buildFilterQuery();
+        const baseParams = `sort=-issued${filterQuery ? '&' + filterQuery : ''}`;
+
+        try {
+            if (currentPageSize === 'all') {
+                // Fetch first page with max allowed pageSize=100 to get total count.
+                const firstUrl = `/api/invoices?${baseParams}&page=1&pageSize=100`;
+                const firstRes = await fetch(firstUrl);
+                if (!firstRes.ok) {
+                    const err = await firstRes.json().catch(() => ({}));
+                    throw new Error(err.error || `HTTP ${firstRes.status}`);
+                }
+                const firstData = await firstRes.json();
+                totalItems = firstData.total ?? firstData.items.length;
+
+                let allItems = firstData.items || [];
+
+                if (totalItems > 100) {
+                    // Fetch remaining pages in parallel.
+                    const totalPages = Math.ceil(totalItems / 100);
+                    const pageNumbers = [];
+                    for (let p = 2; p <= totalPages; p++) pageNumbers.push(p);
+
+                    const results = await Promise.all(
+                        pageNumbers.map(p =>
+                            fetch(`/api/invoices?${baseParams}&page=${p}&pageSize=100`)
+                                .then(r => r.ok ? r.json() : Promise.reject(r.status))
+                                .then(d => d.items || [])
+                        )
+                    );
+                    results.forEach(batch => { allItems = allItems.concat(batch); });
+                }
+
+                updatePaginationUI();
+                renderInvoices(allItems);
+            } else {
+                // Numeric page size: single request.
+                const url = `/api/invoices?${baseParams}&page=${currentPage}&pageSize=${currentPageSize}`;
+                const res = await fetch(url);
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.error || `HTTP ${res.status}`);
+                }
+                const data = await res.json();
+                totalItems = data.total ?? data.items.length;
+                updatePaginationUI();
+                renderInvoices(data.items || []);
+            }
         } catch (error) {
             invoicesContainer.innerHTML = `<div class="invoices-status" style="color: #dc3545;">Failed to load invoices: ${escapeHtml(error.message)}</div>`;
         }
@@ -386,8 +509,8 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('viewId').textContent = formatValue(invoice.id);
             document.getElementById('viewNumber').textContent = formatValue(invoice.number);
             document.getElementById('viewStatus').innerHTML = renderStatusBadge(invoice.paidAt);
-            document.getElementById('viewPaidAt').textContent = formatValue(invoice.paidAt);
-            document.getElementById('viewIssued').textContent = formatValue(invoice.issued);
+            document.getElementById('viewPaidAt').textContent = formatDate(invoice.paidAt);
+            document.getElementById('viewIssued').textContent = formatDate(invoice.issued);
             document.getElementById('viewPriceEur').textContent = formatCurrencyEur(invoice.priceEur);
             document.getElementById('viewQuantity').textContent = formatQuantity(invoice.quantity);
             document.getElementById('viewAmountEur').textContent = formatCurrencyEur(invoice.amountEur);
@@ -405,7 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     .then(contract => {
                         if (contract) {
                             document.getElementById('viewContractNumber').textContent = formatValue(contract.number);
-                            document.getElementById('viewContractIssued').textContent = formatValue(contract.issued);
+                            document.getElementById('viewContractIssued').textContent = formatDate(contract.issued);
                             document.getElementById('viewContractSubject').textContent = formatValue(contract.subject);
                         } else {
                             document.getElementById('viewContractNumber').textContent = `Contract ID #${invoice.contractId}`;
@@ -609,6 +732,52 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentViewingInvoice) {
             deleteInvoice(currentViewingInvoice.id, currentViewingInvoice.number);
         }
+    });
+
+    // --- Toolbar event wiring ---
+    document.getElementById('pageSizeSelect').addEventListener('change', (e) => {
+        currentPageSize = e.target.value === 'all' ? 'all' : parseInt(e.target.value, 10);
+        currentPage = 1;
+        loadInvoices();
+    });
+
+    document.getElementById('prevPageBtn').addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            loadInvoices();
+        }
+    });
+
+    document.getElementById('nextPageBtn').addEventListener('click', () => {
+        if (currentPageSize !== 'all') {
+            const totalPages = Math.ceil(totalItems / currentPageSize) || 1;
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadInvoices();
+            }
+        }
+    });
+
+    document.getElementById('filterApplyBtn').addEventListener('click', () => {
+        const from = document.getElementById('filterFrom').value;
+        const to   = document.getElementById('filterTo').value;
+        if (from && to && from > to) {
+            alert('"From" date must not be after "To" date.');
+            return;
+        }
+        filterFrom = from;
+        filterTo   = to;
+        currentPage = 1;
+        loadInvoices();
+    });
+
+    document.getElementById('filterClearBtn').addEventListener('click', () => {
+        document.getElementById('filterFrom').value = '';
+        document.getElementById('filterTo').value   = '';
+        filterFrom = '';
+        filterTo   = '';
+        currentPage = 1;
+        loadInvoices();
     });
 
     // Initial load

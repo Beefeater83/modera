@@ -188,11 +188,33 @@ document.addEventListener('DOMContentLoaded', () => {
         return String(val);
     }
 
+    // Format a numeric string with space thousands separator, preserving decimal places.
+    // Does NOT convert to float — works on the string directly.
+    function formatMoney(val) {
+        if (val === null || val === undefined || val === '') {
+            return '—';
+        }
+        const s = String(val);
+        const parts = s.split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
+        return parts.join('.');
+    }
+
     function formatCurrency(val) {
         if (val === null || val === undefined || val === '') {
             return '—';
         }
-        return `${Number(val).toFixed(2)} €`;
+        return `${formatMoney(val)} \u20ac`;
+    }
+
+    // Convert YYYY-MM-DD to DD.MM.YYYY for display only.
+    function formatDate(val) {
+        if (val === null || val === undefined || val === '') {
+            return '—';
+        }
+        const m = String(val).match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (!m) return String(val);
+        return `${m[3]}.${m[2]}.${m[1]}`;
     }
 
     function escapeHtml(str) {
@@ -251,11 +273,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 row.innerHTML = `
                     <div class="contracts-col"><strong>${escapeHtml(formatValue(contract.number))}</strong></div>
-                    <div class="contracts-col">${escapeHtml(formatValue(contract.issued))}</div>
-                    <div class="contracts-col">${escapeHtml(formatValue(contract.signed))}</div>
+                    <div class="contracts-col">${escapeHtml(formatDate(contract.issued))}</div>
+                    <div class="contracts-col">${escapeHtml(formatDate(contract.signed))}</div>
                     <div class="contracts-col">${escapeHtml(formatCurrency(contract.amountEur))}</div>
                     <div class="contracts-col">${escapeHtml(formatCurrency(contract.licencePriceEur))}</div>
-                    <div class="contracts-col">${escapeHtml(formatValue(contract.licenceSince))}</div>
+                    <div class="contracts-col">${escapeHtml(formatDate(contract.licenceSince))}</div>
                     <div class="contracts-col">${escapeHtml(formatValue(contract.subject))}</div>
                 `;
 
@@ -301,11 +323,11 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('viewNumber').textContent = formatValue(contract.number);
             document.getElementById('viewCustomer').textContent = formatValue(contract.customer);
             document.getElementById('viewSubject').textContent = formatValue(contract.subject);
-            document.getElementById('viewIssued').textContent = formatValue(contract.issued);
-            document.getElementById('viewSigned').textContent = formatValue(contract.signed);
+            document.getElementById('viewIssued').textContent = formatDate(contract.issued);
+            document.getElementById('viewSigned').textContent = formatDate(contract.signed);
             document.getElementById('viewAmountEur').textContent = formatCurrency(contract.amountEur);
             document.getElementById('viewLicencePriceEur').textContent = formatCurrency(contract.licencePriceEur);
-            document.getElementById('viewLicenceSince').textContent = formatValue(contract.licenceSince);
+            document.getElementById('viewLicenceSince').textContent = formatDate(contract.licenceSince);
             document.getElementById('viewInvoicesCount').textContent = invoiceCount;
             document.getElementById('viewNote').textContent = formatValue(contract.note);
 

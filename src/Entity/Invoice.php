@@ -236,6 +236,7 @@ class Invoice implements JsonSerializable
             'id' => $this->id,
             'number' => $this->number,
             'contractId' => $this->contract->getId(),
+            'contractSubject' => $this->contract->getSubject(),
             'issued' => $this->issued->format('Y-m-d'),
             'priceEur' => $this->priceEur,
             'quantity' => $this->quantity,
