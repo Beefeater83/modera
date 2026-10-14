@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\Web;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-class HomeController extends AbstractController
+class InvoiceWebController extends AbstractController
 {
-    #[Route('/', name: 'app_home', methods: ['GET'])]
+    #[Route('/invoices', name: 'app_invoices_web', methods: ['GET'])]
     public function index(): Response
     {
-        return $this->render('home/index.html.twig');
+        return $this->render('invoice/index.html.twig');
     }
 }

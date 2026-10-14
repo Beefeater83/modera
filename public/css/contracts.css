@@ -12,6 +12,10 @@ body {
     padding: 0;
 }
 
+.hidden {
+    display: none !important;
+}
+
 body.modal-open {
     overflow: hidden;
 }
@@ -179,7 +183,7 @@ body.modal-open {
 /* Rows and columns */
 .contracts-row {
     display: grid;
-    grid-template-columns: 140px 115px 115px 130px 140px 130px 1fr;
+    grid-template-columns: 125px 105px 105px 120px 120px 120px 1fr;
     border-bottom: 1px solid #dee2e6;
     align-items: stretch;
 }
@@ -189,7 +193,7 @@ body.modal-open {
 }
 
 .contracts-col {
-    padding: 10px 12px;
+    padding: 6px 10px;
     border-right: 1px solid #dee2e6;
     display: flex;
     align-items: center;

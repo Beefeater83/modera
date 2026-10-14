@@ -11,6 +11,9 @@ body {
     margin: 0;
     padding: 0;
 }
+.hidden {
+    display: none !important;
+}
 
 body.modal-open {
     overflow: hidden;
@@ -194,15 +197,15 @@ body.modal-open {
 }
 
 .invoices-list {
-    min-width: 1480px;
+    min-width: 1325px;
     display: flex;
     flex-direction: column;
 }
 
-/* Rows and columns (11 columns in exact required order) */
+/* Rows and columns */
 .invoices-row {
     display: grid;
-    grid-template-columns: 130px minmax(150px, 1fr) 105px 110px 85px 120px 95px 135px 115px 135px 95px minmax(150px, 1fr);
+    grid-template-columns: 110px minmax(150px, 1fr) 100px 94px 48px 90px 57px 110px 103.5px 110px 66.5px minmax(150px, 1fr);
     border-bottom: 1px solid #dee2e6;
     align-items: stretch;
 }
@@ -212,7 +215,7 @@ body.modal-open {
 }
 
 .invoices-col {
-    padding: 10px 12px;
+    padding: 3px 8px;
     border-right: 1px solid #dee2e6;
     display: flex;
     align-items: center;
@@ -234,6 +237,13 @@ body.modal-open {
 
 .invoices-header .invoices-col {
     user-select: none;
+}
+
+/* Rate value styling */
+.invoice-item .invoice-rate,
+.invoice-item .invoices-col:nth-child(7) {
+    color: #2b7a4b;
+    font-style: italic;
 }
 
 /* Invoice data item row */
