@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="contracts-col">${escapeHtml(formatCurrency(contract.amountEur))}</div>
                     <div class="contracts-col">${escapeHtml(formatCurrency(contract.licencePriceEur))}</div>
                     <div class="contracts-col">${escapeHtml(formatDate(contract.licenceSince))}</div>
-                    <div class="contracts-col">${escapeHtml(formatValue(contract.subject))}</div>
+                    <div class="contracts-col"><strong>${escapeHtml(formatValue(contract.subject))}</strong></div>
                 `;
 
                 // Clicking row opens view details
