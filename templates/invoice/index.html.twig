@@ -232,6 +232,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const invoiceForm = document.getElementById('invoiceForm');
     const formContractSelect = document.getElementById('formContract');
 
+    function showViewModalAlert(message) {
+        const alert = document.getElementById('viewModalAlert');
+        alert.textContent = message;
+        alert.classList.remove('hidden');
+    }
+
+    function hideViewModalAlert() {
+        const alert = document.getElementById('viewModalAlert');
+        alert.textContent = '';
+        alert.classList.add('hidden');
+    }
+
     function syncBodyScrollLock() {
         const isAnyModalOpen = !viewModalBackdrop.classList.contains('hidden') || !formModalBackdrop.classList.contains('hidden');
         if (isAnyModalOpen) {
@@ -490,7 +502,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // View invoice details
     async function openViewModal(id) {
-        document.getElementById('viewModalAlert').classList.add('hidden');
+        hideViewModalAlert();
         document.getElementById('viewContractNumber').textContent = 'Loading...';
         document.getElementById('viewContractIssued').textContent = '—';
         document.getElementById('viewContractSubject').textContent = '—';
@@ -544,7 +556,9 @@ document.addEventListener('DOMContentLoaded', () => {
             viewModalBackdrop.classList.remove('hidden');
             syncBodyScrollLock();
         } catch (error) {
-            alert(`Failed to open invoice: ${error.message}`);
+            showViewModalAlert(`Failed to open invoice: ${error.message}`);
+            viewModalBackdrop.classList.remove('hidden');
+            syncBodyScrollLock();
         }
     }
 
@@ -594,7 +608,9 @@ document.addEventListener('DOMContentLoaded', () => {
             formModalBackdrop.classList.remove('hidden');
             syncBodyScrollLock();
         } catch (error) {
-            alert(`Failed to load invoice for editing: ${error.message}`);
+            showFormAlert(`Failed to load invoice for editing: ${error.message}`);
+            formModalBackdrop.classList.remove('hidden');
+            syncBodyScrollLock();
         }
     }
 
@@ -696,9 +712,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const errData = await res.json().catch(() => ({}));
             const errorMsg = errData.error || `Failed to delete invoice (HTTP ${res.status})`;
-            alert(`Deletion error: ${errorMsg}`);
+            showViewModalAlert(`Deletion error: ${errorMsg}`);
         } catch (error) {
-            alert(`Network error during deletion: ${error.message}`);
+            showViewModalAlert(`Network error during deletion: ${error.message}`);
         }
     }
 
@@ -762,7 +778,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const from = document.getElementById('filterFrom').value;
         const to   = document.getElementById('filterTo').value;
         if (from && to && from > to) {
-            alert('"From" date must not be after "To" date.');
+            showGlobalAlert('"From" date must not be after "To" date.');
             return;
         }
         filterFrom = from;

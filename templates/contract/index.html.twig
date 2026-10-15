@@ -170,6 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const formModalAlert = document.getElementById('formModalAlert');
     const contractForm = document.getElementById('contractForm');
+    const viewModalAlert = document.getElementById('viewModalAlert');
 
     function syncBodyScrollLock() {
         const isAnyModalOpen = !viewModalBackdrop.classList.contains('hidden') || !formModalBackdrop.classList.contains('hidden');
@@ -242,6 +243,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function hideFormAlert() {
         formModalAlert.innerHTML = '';
         formModalAlert.classList.add('hidden');
+    }
+
+    function showViewModalAlert(message) {
+        viewModalAlert.textContent = message;
+        viewModalAlert.classList.remove('hidden');
+    }
+
+    function hideViewModalAlert() {
+        viewModalAlert.textContent = '';
+        viewModalAlert.classList.add('hidden');
     }
 
     // Load contracts list
@@ -480,9 +491,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const errData = await res.json().catch(() => ({}));
             const errorMsg = errData.error || `Failed to delete contract (HTTP ${res.status})`;
-            alert(`Deletion error: ${errorMsg}`);
+            showViewModalAlert(`Deletion error: ${errorMsg}`);
         } catch (error) {
-            alert(`Network error during deletion: ${error.message}`);
+            showViewModalAlert(`Network error during deletion: ${error.message}`);
         }
     }
 
