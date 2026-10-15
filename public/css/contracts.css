@@ -26,10 +26,13 @@ body.modal-open {
     color: #fff;
     padding: 0 16px;
     border-bottom: 1px solid #343a40;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .nav-container {
-    max-width: 1280px;
+    max-width: 1380px;
     margin: 0 auto;
     display: flex;
     align-items: center;
@@ -71,7 +74,7 @@ body.modal-open {
 }
 
 .container {
-    max-width: 1300px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 24px 16px;
 }
