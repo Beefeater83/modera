@@ -10,16 +10,18 @@ use App\Model\Page;
 use App\Model\Sort;
 use App\Repository\ContractRepository;
 use App\Repository\InvoiceRepository;
-use App\Service\InvoiceCalculationService;
+use App\Services\InvoiceCalculationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/invoices')]
+#[IsGranted('ROLE_USER')]
 class InvoiceController extends AbstractApiController
 {
     private InvoiceRepository $invoiceRepository;
@@ -58,6 +60,7 @@ class InvoiceController extends AbstractApiController
     }
 
     #[Route('', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function create(Request $request): JsonResponse
     {
         $payload = $this->getJsonPayload($request);
@@ -108,6 +111,7 @@ class InvoiceController extends AbstractApiController
     }
 
     #[Route('/{id}', requirements: ['id' => '\d+'], methods: ['PATCH'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function update(int $id, Request $request): JsonResponse
     {
         $invoice = $this->invoiceRepository->getOrFail($id);
@@ -189,6 +193,7 @@ class InvoiceController extends AbstractApiController
     }
 
     #[Route('/{id}', requirements: ['id' => '\d+'], methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function delete(int $id): JsonResponse
     {
         $invoice = $this->invoiceRepository->getOrFail($id);

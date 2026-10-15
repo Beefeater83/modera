@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Service;
+namespace App\Services;
 
 use App\Entity\Invoice;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
