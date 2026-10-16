@@ -8,11 +8,14 @@ use Symfony\Component\HttpFoundation\Cookie;
 
 class CookieService
 {
+    public function __construct(private string $environment)
+    {
+    }
     public function createAccessCookie(string $accessToken): Cookie
     {
         return Cookie::create('access_token', $accessToken, new \DateTimeImmutable('+5 minutes'))
             ->withHttpOnly(true)
-            ->withSecure(true)
+            ->withSecure($this->environment === 'prod')
             ->withPath('/');
     }
 
@@ -20,7 +23,7 @@ class CookieService
     {
         return Cookie::create('refresh_token', $refreshTokenValue, new \DateTimeImmutable('+1 hours'))
             ->withHttpOnly(true)
-            ->withSecure(true)
+            ->withSecure($this->environment === 'prod')
             ->withPath('/');
     }
 }

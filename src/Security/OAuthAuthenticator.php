@@ -21,13 +21,14 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class OAuthAuthenticator extends OAuth2Authenticator
 {
     public function __construct(
         private ClientRegistry $clientRegistry,
         private UserRepository $userRepository,
-        private string $frontendUrl,
+        private UrlGeneratorInterface $urlGenerator,
         private LoggerInterface $logger,
         private EventDispatcherInterface $eventDispatcher,
         private OAuthEmailService $authEmailService,
@@ -92,7 +93,9 @@ class OAuthAuthenticator extends OAuth2Authenticator
 
         $this->eventDispatcher->dispatch(new UserLoggedInEvent($user));
 
-        $response = new RedirectResponse($this->frontendUrl . '?login=success');
+        $response = new RedirectResponse(
+            $this->urlGenerator->generate('app_home')
+        );
 
         $response->headers->setCookie(
             $this->cookieService->createAccessCookie($accessToken)
@@ -112,7 +115,7 @@ class OAuthAuthenticator extends OAuth2Authenticator
         ]);
 
         return new RedirectResponse(
-            $this->frontendUrl . '?login=failed'
+            $this->urlGenerator->generate('app_home')
         );
     }
 }
