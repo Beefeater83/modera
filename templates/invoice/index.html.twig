@@ -3,7 +3,7 @@
 {% block title %}Invoices{% endblock %}
 
 {% block stylesheets %}
-    <link rel="stylesheet" href="/css/invoices.css">
+    <link rel="stylesheet" href="{{ asset('css/invoices.css') }}">
 {% endblock %}
 
 {% block body %}
@@ -78,9 +78,6 @@
 
             <div class="detail-section-title">Invoice Details</div>
             <div class="property-list">
-                <div class="property-label">ID:</div>
-                <div class="property-value" id="viewId">—</div>
-
                 <div class="property-label">Invoice number:</div>
                 <div class="property-value" id="viewNumber">—</div>
 
@@ -518,7 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentViewingInvoice = invoice;
 
             document.getElementById('viewModalTitle').textContent = `Invoice No. ${invoice.number || ''}`;
-            document.getElementById('viewId').textContent = formatValue(invoice.id);
+            //document.getElementById('viewId').textContent = formatValue(invoice.id);
             document.getElementById('viewNumber').textContent = formatValue(invoice.number);
             document.getElementById('viewStatus').innerHTML = renderStatusBadge(invoice.paidAt);
             document.getElementById('viewPaidAt').textContent = formatDate(invoice.paidAt);

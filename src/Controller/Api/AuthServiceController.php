@@ -9,8 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Cookie;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use App\Services\CookieService;
 
 class AuthServiceController extends AbstractController
@@ -21,7 +20,7 @@ class AuthServiceController extends AbstractController
     ) {
     }
 
-    #[Route('/refresh', name: 'api_refresh', methods: ['POST'])]
+    #[Route('/api/refresh', name: 'api_refresh', methods: ['POST'])]
     public function refresh(Request $request): Response
     {
         $refreshTokenValue = $request->cookies->get('refresh_token');
@@ -47,7 +46,7 @@ class AuthServiceController extends AbstractController
         return $response;
     }
 
-    #[Route('/logout', name: 'api_logout', methods: ['POST'])]
+    #[Route('/api/logout', name: 'api_logout', methods: ['POST'])]
     public function logout(Request $request): Response
     {
         $refreshTokenValue = $request->cookies->get('refresh_token');
@@ -60,20 +59,22 @@ class AuthServiceController extends AbstractController
         return $response;
     }
 
-    #[Route('/me', name: 'auth_me', methods: ['GET'])]
+    #[Route('/api/me', name: 'auth_me', methods: ['GET'])]
     public function authStatus(): JsonResponse
     {
-        if (!$this->getUser()) {
+        $user = $this->getUser();
+
+        if (!$user) {
             return $this->json([
                 'authenticated' => false,
-            ]);
+            ], 401);
         }
-
-        $user = $this->getUser();
 
         return $this->json([
             'authenticated' => true,
-            'name' => $user->getName()
+            'name' => $user->getName(),
+            'roles' => $user->getRoles(),
+            'isAdmin' => in_array('ROLE_ADMIN', $user->getRoles(), true),
         ]);
     }
 }

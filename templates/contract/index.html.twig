@@ -3,7 +3,7 @@
 {% block title %}Contracts{% endblock %}
 
 {% block stylesheets %}
-    <link rel="stylesheet" href="/css/contracts.css">
+    <link rel="stylesheet" href="{{ asset('css/contracts.css') }}">
 {% endblock %}
 
 {% block body %}
@@ -529,7 +529,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Initial load
     loadContracts();
 });
 </script>

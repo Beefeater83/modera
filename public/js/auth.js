@@ -26,10 +26,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
         authModal.classList.remove('show');
         authModal.hidden = true;
+
+        otpEmail.value = '';
+        otpCode.value = '';
+
+        otpVerifyForm.hidden = true;
+        otpRequestForm.reset();
+        otpVerifyForm.reset();
+
+        setOtpMessage('');
+
+        setOtpLoading(
+            otpRequestBtn,
+            false,
+            'Send verification code'
+        );
+
+        setOtpLoading(
+            otpVerifyBtn,
+            false,
+            'Verify and sign in'
+        );
     }
 
     async function requestMe() {
-        return fetch('/me', {
+        return fetch('/api/me', {
             method: 'GET',
             credentials: 'same-origin',
             headers: {
@@ -51,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
             throw new Error(`Auth status request failed: ${response.status}`);
         }
 
-        const refreshResponse = await fetch('/refresh', {
+        const refreshResponse = await fetch('/api/refresh', {
             method: 'POST',
             credentials: 'same-origin',
             headers: {
@@ -76,6 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
     async function updateAuthUI() {
         const oauthAttempted =
             sessionStorage.getItem('oauth_attempted') === '1';
+        const otpLoginAttempted =
+            sessionStorage.getItem('otp_login_success') === '1';
 
         try {
             const data = await getAuthState();
@@ -100,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 authenticateBtn.hidden = authenticated;
             }
 
-            if (oauthAttempted) {
+            if (oauthAttempted || otpLoginAttempted) {
                 if (authenticated) {
                     showStatus(
                         `You have successfully signed in${data.name ? `, ${data.name}` : ''}.`,
@@ -108,12 +131,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     );
                 } else {
                     showStatus(
-                        'Sign-in failed. Your account may not be registered in the system.',
+                        'Sign-in failed. Please try again.',
                         'failure'
                     );
                 }
 
                 sessionStorage.removeItem('oauth_attempted');
+                sessionStorage.removeItem('otp_login_success');
             }
         } catch (error) {
             console.error('Unable to check authentication:', error);
@@ -135,13 +159,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 authenticateBtn.hidden = false;
             }
 
-            if (oauthAttempted) {
+            if (oauthAttempted || otpLoginAttempted) {
                 showStatus(
                     'Unable to verify sign-in. Please try again.',
                     'failure'
                 );
 
                 sessionStorage.removeItem('oauth_attempted');
+                sessionStorage.removeItem('otp_login_success');
             }
         }
     }
@@ -161,18 +186,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('auth-cancel')?.addEventListener('click', hideModal);
 
-    authModal?.addEventListener('click', (event) => {
-        if (event.target === authModal) {
-            hideModal();
-        }
-    });
-
-    document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && authModal?.classList.contains('show')) {
-            hideModal();
-        }
-    });
-
     document.getElementById('google-login')?.addEventListener('click', () => {
         sessionStorage.setItem('oauth_attempted', '1');
         window.location.href = '/api/connect/google';
@@ -188,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
             logoutBtn.disabled = true;
 
             try {
-                await fetch('/logout', {
+                await fetch('/api/logout', {
                     method: 'POST',
                     credentials: 'same-origin',
                     headers: {
@@ -207,6 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 //**************************OTP************************/
+
 const otpRequestForm = document.getElementById('otp-request-form');
 const otpVerifyForm = document.getElementById('otp-verify-form');
 const otpEmail = document.getElementById('otp-email');
@@ -215,17 +229,21 @@ const otpMessage = document.getElementById('otp-message');
 const otpRequestBtn = document.getElementById('otp-request-btn');
 const otpVerifyBtn = document.getElementById('otp-verify-btn');
 
-function setOtpMessage(message) {
-    document.getElementById('otp-message').textContent = message;
+function setOtpMessage(message, type = 'error') {
+    otpMessage.textContent = message;
+    otpMessage.className = `otp-message ${type}`;
 }
 
 function setOtpLoading(button, loading, originalText) {
-    if (!button) return;
+    if (!button) {
+        return;
+    }
 
     button.disabled = loading;
     button.textContent = loading ? 'Please wait...' : originalText;
 }
 
+// Request OTP code.
 if (otpRequestForm) {
     otpRequestForm.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -234,7 +252,7 @@ if (otpRequestForm) {
 
         setOtpMessage('');
 
-        if (!otpEmail.checkValidity() || !email) {
+        if (!email || !otpEmail.checkValidity()) {
             otpEmail.reportValidity();
             return;
         }
@@ -246,7 +264,7 @@ if (otpRequestForm) {
         );
 
         try {
-            const response = await fetch('/iam/otp', {
+            const response = await fetch('/api/iam/otp', {
                 method: 'POST',
                 credentials: 'same-origin',
                 headers: {
@@ -256,36 +274,39 @@ if (otpRequestForm) {
                 body: JSON.stringify({ email }),
             });
 
-            if (response.status === 200) {
-                otpVerifyForm.hidden = false;
-                otpCode.value = '';
-                otpCode.focus();
-
-                setOtpMessage(
-                    'Verification code sent. It is valid for 5 minutes.',
-                    'success'
-                );
-
-                return;
-            }
-
-            if (response.status === 400) {
-                setOtpMessage('Please enter a valid email address.', 'error');
-                return;
-            }
-
             if (response.status === 404) {
-                setOtpMessage('User not found.', 'error');
+                setOtpMessage(
+                    'No account found with this email address.',
+                    'error'
+                );
+                otpVerifyForm.hidden = true;
+                otpCode.value = '';
                 return;
             }
+
+            if (!response.ok) {
+                setOtpMessage(
+                    `Unable to send verification code (${response.status}). Please try again.`,
+                    'error'
+                );
+                return;
+            }
+
+            otpVerifyForm.hidden = false;
+            otpCode.value = '';
+            otpCode.focus();
 
             setOtpMessage(
-                `Unable to send verification code (${response.status}).`,
-                'error'
+                'Verification code sent. It is valid for 5 minutes.',
+                'success'
             );
         } catch (error) {
             console.error('OTP request failed:', error);
-            setOtpMessage('Network error. Please try again.', 'error');
+
+            setOtpMessage(
+                'Network error. Please try again.',
+                'error'
+            );
         } finally {
             setOtpLoading(
                 otpRequestBtn,
@@ -296,6 +317,7 @@ if (otpRequestForm) {
     });
 }
 
+// Verify OTP code and sign in.
 if (otpVerifyForm) {
     otpVerifyForm.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -305,16 +327,29 @@ if (otpVerifyForm) {
 
         setOtpMessage('');
 
+        if (!email || !otpEmail.checkValidity()) {
+            setOtpMessage('Enter a valid email address.', 'error');
+            otpEmail.focus();
+            return;
+        }
+
         if (!/^\d{6}$/.test(otp)) {
-            setOtpMessage('Enter the 6-digit verification code.', 'error');
+            setOtpMessage(
+                'Enter the 6-digit verification code.',
+                'error'
+            );
             otpCode.focus();
             return;
         }
 
-        setOtpLoading(otpVerifyBtn, true, 'Verify and sign in');
+        setOtpLoading(
+            otpVerifyBtn,
+            true,
+            'Verify and sign in'
+        );
 
         try {
-            const response = await fetch('/iam/otp-verification', {
+            const response = await fetch('/api/iam/otp-verification', {
                 method: 'POST',
                 credentials: 'same-origin',
                 headers: {
@@ -324,49 +359,45 @@ if (otpVerifyForm) {
                 body: JSON.stringify({ email, otp }),
             });
 
-            if (!response.ok) {
-                if (response.status === 401) {
-                    otpCode.value = '';
-                    otpVerifyForm.hidden = true;
-
-                    setOtpMessage(
-                        'Invalid or expired verification code. Request a new code.',
-                        'error'
-                    );
-
-                    return;
-                }
+            if (response.status === 401) {
+                otpCode.value = '';
+                otpVerifyForm.hidden = true;
 
                 setOtpMessage(
-                    `Verification failed (${response.status}).`,
+                    'Invalid or expired verification code. Request a new code.',
                     'error'
                 );
 
                 return;
             }
 
-            // check auth by JWT-cookie.
-            const meResponse = await requestMe();
+            if (!response.ok) {
+                setOtpMessage(
+                    `Verification failed (${response.status}). Please try again.`,
+                    'error'
+                );
 
-            if (meResponse.ok) {
-                const user = await meResponse.json();
-
-                if (user.authenticated === true) {
-                    sessionStorage.removeItem('oauth_attempted');
-                    window.location.href = '/';
-                    return;
-                }
+                return;
             }
 
-            setOtpMessage(
-                'The code could not be verified. Please try again.',
-                'error'
-            );
+            // Authentication succeeded; the server has set the cookies.
+            sessionStorage.setItem('otp_login_success', '1');
+            sessionStorage.removeItem('oauth_attempted');
+
+            window.location.href = '/';
         } catch (error) {
             console.error('OTP verification failed:', error);
-            setOtpMessage('Network error. Please try again.', 'error');
+
+            setOtpMessage(
+                'Network error. Please try again.',
+                'error'
+            );
         } finally {
-            setOtpLoading(otpVerifyBtn, false, 'Verify and sign in');
+            setOtpLoading(
+                otpVerifyBtn,
+                false,
+                'Verify and sign in'
+            );
         }
     });
 }
