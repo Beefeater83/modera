@@ -10,7 +10,9 @@
 <div class="container">
     <div class="page-header">
         <h1 class="page-title">Invoices</h1>
+        {% if is_granted('ROLE_ADMIN') %}
         <button id="addInvoiceBtn" class="btn btn-primary" type="button">+ Add Invoice</button>
+        {% endif %}
     </div>
 
     <div id="globalAlert" class="alert alert-danger hidden"></div>
@@ -131,8 +133,10 @@
             </div>
         </div>
         <div class="modal-footer">
+            {% if is_granted('ROLE_ADMIN') %}
             <button type="button" class="btn btn-secondary" id="viewModalEditBtn">Edit</button>
             <button type="button" class="btn btn-danger" id="viewModalDeleteBtn">Delete</button>
+            {% endif %}
             <button type="button" class="btn btn-secondary" id="viewModalCloseFooterBtn">Close</button>
         </div>
     </div>
@@ -716,7 +720,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Event listeners
-    document.getElementById('addInvoiceBtn').addEventListener('click', openAddModal);
+    document.getElementById('addInvoiceBtn')?.addEventListener('click', openAddModal);
 
     // Modal close buttons
     document.getElementById('viewModalCloseBtn').addEventListener('click', closeViewModal);
@@ -733,7 +737,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Actions inside view modal
-    document.getElementById('viewModalEditBtn').addEventListener('click', () => {
+    document.getElementById('viewModalEditBtn')?.addEventListener('click', () => {
         if (currentViewingInvoice) {
             const id = currentViewingInvoice.id;
             closeViewModal();
@@ -741,7 +745,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    document.getElementById('viewModalDeleteBtn').addEventListener('click', () => {
+    document.getElementById('viewModalDeleteBtn')?.addEventListener('click', () => {
         if (currentViewingInvoice) {
             deleteInvoice(currentViewingInvoice.id, currentViewingInvoice.number);
         }
