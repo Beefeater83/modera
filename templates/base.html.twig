@@ -54,5 +54,21 @@
         {% endblock %}
 
         {% block body %}{% endblock %}
+        <div id="passkey-modal" class="passkey-modal" hidden>
+            <div class="passkey-modal-content">
+                <h2>Your Passkeys</h2>
+
+                <div id="passkey-list" class="passkey-list"></div>
+
+                <button type="button" class="passkey-provider" id="create-passkey-btn">
+                    <span>🔐</span>
+                    <span>Create new Passkey</span>
+                </button>
+
+                <button type="button" class="passkey-cancel" id="close-passkey-btn">
+                    Cancel
+                </button>
+            </div>
+        </div>
     </body>
 </html>

@@ -218,3 +218,160 @@ body {
         font-size: 12px;
     }
 }
+
+/*PASSKEY*/
+
+.passkey-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.passkey-modal.show {
+    display: flex;
+}
+
+.passkey-modal-content {
+    width: min(420px, calc(100% - 32px));
+
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 18px;
+
+    padding: 24px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    box-shadow: 0 20px 60px rgba(0,0,0,.45);
+}
+
+.passkey-modal-content h2 {
+    margin: 0;
+    color: white;
+    text-align: center;
+    font-size: 1.25rem;
+}
+
+
+.passkey-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.passkey-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    padding: 12px;
+
+    background: #27272a;
+    border: 1px solid #3f3f46;
+    border-radius: 12px;
+}
+
+.passkey-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.passkey-name {
+    color: white;
+    font-size: .95rem;
+    font-weight: 500;
+}
+
+.passkey-date {
+    margin-top: 3px;
+    color: #71717a;
+    font-size: .8rem;
+}
+
+.passkey-delete {
+    flex-shrink: 0;
+
+    padding: 7px 12px;
+
+    border: 1px solid #7f3030;
+    border-radius: 8px;
+
+    background: #3f2020;
+    color: #d87878;
+
+    cursor: pointer;
+
+    transition: all .2s ease;
+}
+
+.passkey-delete:hover {
+    background: #ef4444;
+    border-color: #ef4444;
+    color: white;
+}
+
+.passkey-cancel:focus-visible {
+    outline: 2px solid #0d6efd;
+    outline-offset: 3px;
+}
+
+.passkey-cancel {
+    padding: 8px;
+    color: #a1a1aa;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.passkey-cancel:hover {
+    color: #fff;
+}
+
+.passkey-provider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    width: 100%;
+    min-height: 52px;
+    padding: 12px;
+
+    color: #fff;
+    background: #27272a;
+    border: 1px solid #3f3f46;
+    border-radius: 10px;
+
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.passkey-provider img {
+    width: 22px;
+    height: 22px;
+}
+
+.passkey-provider:hover {
+    color: #111827;
+    background: #fff;
+}
+
+.passkey-provider:focus-visible{
+    outline: 2px solid #0d6efd;
+    outline-offset: 3px;
+}
+
+.passkey-empty-message{
+    color: #e66e6e;
+    text-align: center;
+}
