@@ -7,6 +7,13 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    passkey_rp_id: '%env(default:default_passkey_rp_id:PASSKEY_RP_ID)%'
+    passkey_rp_name: '%env(default:default_passkey_rp_name:PASSKEY_RP_NAME)%'
+    passkey_origins: '%env(default:default_passkey_origins:PASSKEY_ORIGINS)%'
+    default_passkey_rp_id: 'localhost'
+    default_passkey_rp_name: 'Security'
+    default_passkey_origins: 'http://localhost,http://localhost:8000,http://localhost:5173,http://127.0.0.1,http://127.0.0.1:8000,http://127.0.0.1:5173,https://modera.diakonov-it.com.ua'
+
 
 services:
     # default configuration for services in *this* file
@@ -51,5 +58,16 @@ services:
             $logger: '@monolog.logger.security'
 
     App\Services\OtpService:
+        arguments:
+            $logger: '@monolog.logger.security'
+
+    App\Services\PasskeyService:
+        arguments:
+            $rpId: '%passkey_rp_id%'
+            $rpName: '%passkey_rp_name%'
+            $allowedOrigins: '%passkey_origins%'
+            $logger: '@monolog.logger.security'
+
+    App\Controller\Api\PasskeyController:
         arguments:
             $logger: '@monolog.logger.security'
