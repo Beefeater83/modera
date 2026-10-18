@@ -99,6 +99,8 @@ document.addEventListener('DOMContentLoaded', () => {
             sessionStorage.getItem('oauth_attempted') === '1';
         const otpLoginAttempted =
             sessionStorage.getItem('otp_login_success') === '1';
+        const passkeyLoginAttempted =
+            sessionStorage.getItem('passkey_login_attempted') === '1';
 
         try {
             const data = await getAuthState();
@@ -115,6 +117,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     : '';
             }
 
+            const passkeyMenuBtn = document.getElementById('passkey-menu-btn');
+
+            passkeyMenuBtn?.addEventListener('click', openPasskeyMenu);
+
+            document.getElementById('close-passkey-btn')
+                ?.addEventListener('click', closePasskeyMenu);
+
+            document.getElementById('create-passkey-btn')
+                ?.addEventListener('click', createPasskeyFromMenu);
+
+            if (passkeyMenuBtn) {
+                passkeyMenuBtn.hidden = !authenticated;
+            }
+
             if (logoutBtn) {
                 logoutBtn.hidden = !authenticated;
             }
@@ -123,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 authenticateBtn.hidden = authenticated;
             }
 
-            if (oauthAttempted || otpLoginAttempted) {
+            if (oauthAttempted || otpLoginAttempted || passkeyLoginAttempted) {
                 if (authenticated) {
                     showStatus(
                         `You have successfully signed in${data.name ? `, ${data.name}` : ''}.`,
@@ -138,6 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 sessionStorage.removeItem('oauth_attempted');
                 sessionStorage.removeItem('otp_login_success');
+                sessionStorage.removeItem('passkey_login_attempted');
             }
         } catch (error) {
             console.error('Unable to check authentication:', error);
@@ -159,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 authenticateBtn.hidden = false;
             }
 
-            if (oauthAttempted || otpLoginAttempted) {
+            if (oauthAttempted || otpLoginAttempted || passkeyLoginAttempted) {
                 showStatus(
                     'Unable to verify sign-in. Please try again.',
                     'failure'
@@ -167,6 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 sessionStorage.removeItem('oauth_attempted');
                 sessionStorage.removeItem('otp_login_success');
+                sessionStorage.removeItem('passkey_login_attempted');
             }
         }
     }
@@ -195,6 +213,8 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionStorage.setItem('oauth_attempted', '1');
         window.location.href = '/api/connect/github';
     });
+
+    document.getElementById('passkey-login')?.addEventListener('click', loginWithPasskey);
 
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async () => {
@@ -400,4 +420,433 @@ if (otpVerifyForm) {
             );
         }
     });
+}
+
+//**************************PASSKEY************************/
+
+async function loginWithPasskey() {
+    const authStatus = document.getElementById('auth-status');
+
+    if (authStatus) {
+        authStatus.hidden = true;
+    }
+
+    try {
+        const response = await fetch(
+            '/api/iam/passkey/authentication/options',
+            {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json',
+                },
+            }
+        );
+
+        const options = await response.json();
+
+        if (!response.ok) {
+            showPasskeyError();
+            return;
+        }
+
+        const credential = await navigator.credentials.get({
+            publicKey: decodeAuthenticationOptions(options),
+        });
+
+        if (!credential) {
+            showPasskeyError();
+            return;
+        }
+
+        const verifyResponse = await fetch(
+            '/api/iam/passkey/authentication/verify',
+            {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    credential: encodeCredential(credential),
+                }),
+            }
+        );
+
+        if (!verifyResponse.ok) {
+            showPasskeyError();
+            return;
+        }
+
+        sessionStorage.setItem('passkey_login_attempted', '1');
+        sessionStorage.removeItem('oauth_attempted');
+        sessionStorage.removeItem('otp_login_success');
+
+        window.location.href = '/';
+    } catch (error) {
+        console.error('Passkey authentication failed:', error);
+
+        showPasskeyError();
+    }
+}
+
+function showPasskeyError() {
+    const authStatus = document.getElementById('auth-status');
+
+    if (!authStatus) {
+        return;
+    }
+
+    authStatus.textContent = 'Sign-in failed. Please try again.';
+    authStatus.className = 'auth-status failure';
+    authStatus.hidden = false;
+}
+
+function decodeAuthenticationOptions(options) {
+    options.challenge = base64urlToUint8Array(options.challenge);
+
+    if (options.allowCredentials) {
+        options.allowCredentials = options.allowCredentials.map(credential => ({
+            ...credential,
+            id: base64urlToUint8Array(credential.id),
+        }));
+    }
+
+    return options;
+}
+
+function encodeCredential(credential) {
+    return {
+        id: credential.id,
+        rawId: uint8ArrayToBase64url(
+            new Uint8Array(credential.rawId)
+        ),
+        type: credential.type,
+        response: {
+            clientDataJSON: uint8ArrayToBase64url(
+                new Uint8Array(credential.response.clientDataJSON)
+            ),
+            authenticatorData: uint8ArrayToBase64url(
+                new Uint8Array(credential.response.authenticatorData)
+            ),
+            signature: uint8ArrayToBase64url(
+                new Uint8Array(credential.response.signature)
+            ),
+            userHandle: credential.response.userHandle
+                ? uint8ArrayToBase64url(
+                    new Uint8Array(credential.response.userHandle)
+                )
+                : null,
+        },
+    };
+}
+
+function base64urlToUint8Array(base64url) {
+    const padding = '='.repeat((4 - base64url.length % 4) % 4);
+    const base64 = (base64url + padding)
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+
+    return Uint8Array.from(
+        atob(base64),
+        character => character.charCodeAt(0)
+    );
+}
+
+function uint8ArrayToBase64url(bytes) {
+    let binary = '';
+
+    bytes.forEach(byte => {
+        binary += String.fromCharCode(byte);
+    });
+
+    return btoa(binary)
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=/g, '');
+}
+
+
+function showPasskeyMessage(message, type = 'error') {
+    const authStatus = document.getElementById('auth-status');
+    const globalAlert = document.getElementById('globalAlert');
+    const target = authStatus || globalAlert;
+
+    if (!target) {
+        console.error(message);
+        return;
+    }
+
+    target.textContent = message;
+    target.hidden = false;
+
+    if (target.id === 'globalAlert') {
+        target.className = type === 'success'
+            ? 'alert alert-success'
+            : 'alert alert-danger';
+    } else {
+        target.className = type === 'success'
+            ? 'auth-status success'
+            : 'auth-status failure';
+    }
+}
+
+function clearPasskeyMessage() {
+    for (const id of ['auth-status', 'globalAlert']) {
+        const element = document.getElementById(id);
+
+        if (!element) {
+            continue;
+        }
+
+        element.textContent = '';
+        element.hidden = true;
+
+        if (id === 'globalAlert') {
+            element.className = 'alert alert-danger hidden';
+        } else {
+            element.className = 'auth-status';
+        }
+    }
+}
+
+async function readPasskeyResponse(response) {
+    try {
+        return await response.json();
+    } catch {
+        return {};
+    }
+}
+
+async function openPasskeyMenu() {
+    const modal = document.getElementById('passkey-modal');
+    const list = document.getElementById('passkey-list');
+
+    if (!modal || !list) {
+        showPasskeyMessage('Passkey menu is unavailable on this page.');
+        return;
+    }
+
+    clearPasskeyMessage();
+
+    modal.hidden = false;
+    modal.classList.add('show');
+
+    list.textContent = 'Loading...';
+
+    try {
+        const response = await fetch('/api/iam/passkeys', {
+            credentials: 'same-origin',
+            headers: { Accept: 'application/json' }
+        });
+
+        const data = await readPasskeyResponse(response);
+
+        if (!response.ok || !Array.isArray(data)) {
+            list.replaceChildren();
+            showPasskeyMessage(
+                data.error || 'Failed to load Passkeys.'
+            );
+            return;
+        }
+
+        list.replaceChildren();
+
+        if (data.length === 0) {
+            const emptyMessage = document.createElement('div');
+            emptyMessage.className = 'passkey-empty-message';
+            emptyMessage.textContent = 'No Passkeys registered.';
+            list.appendChild(emptyMessage);
+            return;
+        }
+
+        for (const passkey of data) {
+            const item = document.createElement('div');
+            item.className = 'passkey-item';
+
+            const info = document.createElement('div');
+            info.className = 'passkey-info';
+
+            const name = document.createElement('div');
+            name.className = 'passkey-name';
+            name.textContent = passkey.name || 'Passkey';
+
+            const date = document.createElement('div');
+            date.className = 'passkey-date';
+
+            const createdAt = new Date(passkey.createdAt);
+            date.textContent = `Added: ${
+                Number.isNaN(createdAt.getTime())
+                    ? 'Unknown'
+                    : createdAt.toLocaleDateString()
+            }`;
+
+            const deleteButton = document.createElement('button');
+            deleteButton.type = 'button';
+            deleteButton.className = 'passkey-delete';
+            deleteButton.textContent = 'Delete';
+
+            deleteButton.addEventListener('click', async () => {
+                await deletePasskey(passkey.id);
+            });
+
+            info.append(name, date);
+            item.append(info, deleteButton);
+            list.appendChild(item);
+        }
+    } catch (error) {
+        console.error('Failed to load Passkeys:', error);
+        list.replaceChildren();
+        showPasskeyMessage('Failed to load Passkeys. Please try again.');
+    }
+}
+
+function closePasskeyMenu() {
+    const modal = document.getElementById('passkey-modal');
+
+    if (modal) {
+        modal.classList.remove('show');
+        modal.hidden = true;
+    }
+}
+
+async function createPasskeyFromMenu() {
+    closePasskeyMenu();
+    await createPasskey();
+}
+
+async function createPasskey() {
+    clearPasskeyMessage();
+
+    try {
+        const optionsResponse = await fetch(
+            '/api/iam/passkey/registration/options',
+            {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { Accept: 'application/json' }
+            }
+        );
+
+        const options = await readPasskeyResponse(optionsResponse);
+
+        if (!optionsResponse.ok) {
+            showPasskeyMessage(
+                options.error || 'Failed to start Passkey registration.'
+            );
+            return;
+        }
+
+        options.challenge = base64urlToUint8Array(options.challenge);
+        options.user.id = base64urlToUint8Array(options.user.id);
+
+        if (options.excludeCredentials) {
+            options.excludeCredentials = options.excludeCredentials.map(
+                credential => ({
+                    ...credential,
+                    id: base64urlToUint8Array(credential.id)
+                })
+            );
+        }
+
+        const credential = await navigator.credentials.create({
+            publicKey: options
+        });
+
+        if (!credential) {
+            showPasskeyMessage('Passkey registration was cancelled.');
+            return;
+        }
+
+        const credentialData = {
+            id: credential.id,
+            rawId: uint8ArrayToBase64url(
+                new Uint8Array(credential.rawId)
+            ),
+            type: credential.type,
+            response: {
+                clientDataJSON: uint8ArrayToBase64url(
+                    new Uint8Array(credential.response.clientDataJSON)
+                ),
+                attestationObject: uint8ArrayToBase64url(
+                    new Uint8Array(credential.response.attestationObject)
+                )
+            }
+        };
+
+        const verifyResponse = await fetch(
+            '/api/iam/passkey/registration/verify',
+            {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json'
+                },
+                body: JSON.stringify({
+                    credential: credentialData
+                })
+            }
+        );
+
+        const result = await readPasskeyResponse(verifyResponse);
+
+        if (!verifyResponse.ok) {
+            showPasskeyMessage(
+                result.error || 'Passkey registration failed.'
+            );
+            return;
+        }
+
+        showPasskeyMessage(
+            'Passkey created successfully.',
+            'success'
+        );
+
+        await openPasskeyMenu();
+    } catch (error) {
+        console.error('Passkey registration failed:', error);
+
+        showPasskeyMessage(
+            error.name === 'NotAllowedError'
+                ? 'Passkey registration was cancelled.'
+                : 'Passkey registration failed. Please try again.'
+        );
+    }
+}
+
+async function deletePasskey(id) {
+    clearPasskeyMessage();
+
+    try {
+        const response = await fetch(
+            `/api/iam/passkeys/${encodeURIComponent(id)}`,
+            {
+                method: 'DELETE',
+                credentials: 'same-origin',
+                headers: { Accept: 'application/json' }
+            }
+        );
+
+        const data = await readPasskeyResponse(response);
+
+        if (!response.ok) {
+            showPasskeyMessage(
+                data.error || 'Failed to delete Passkey.'
+            );
+            return;
+        }
+
+        await openPasskeyMenu();
+        showPasskeyMessage(
+            'Passkey deleted successfully.',
+            'success'
+        );
+    } catch (error) {
+        console.error('Passkey deletion failed:', error);
+        showPasskeyMessage(
+            'Failed to delete Passkey. Please try again.'
+        );
+    }
 }

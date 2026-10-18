@@ -1,0 +1,377 @@
+/* Base page styles */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+}
+
+[hidden],
+.hidden {
+    display: none !important;
+}
+
+/* Base container */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 16px;
+}
+
+/* Base Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+.btn-secondary {
+    color: #495057;
+    background-color: #e9ecef;
+    border-color: #ced4da;
+}
+
+.btn-secondary:hover {
+    background-color: #dde0e3;
+}
+
+/* Navigation bar */
+.app-nav {
+    background-color: #212529;
+    color: #fff;
+    padding: 0 16px;
+    border-bottom: 1px solid #343a40;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-container {
+    max-width: 1380px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    min-height: 54px;
+    gap: 20px;
+    justify-content: space-between;
+}
+
+.nav-brand {
+    font-weight: 700;
+    font-size: 18px;
+    color: #fff;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-link {
+    color: #adb5bd;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: color 0.15s, background-color 0.15s;
+}
+
+.nav-link:hover {
+    color: #fff;
+    background-color: #343a40;
+}
+
+.nav-link.active {
+    color: #fff;
+    background-color: #0d6efd;
+}
+
+/* Navigation auth */
+.nav-auth {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+#current-user {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 240px;
+}
+
+.nav-auth .btn {
+    white-space: nowrap;
+}
+
+#passkey-menu-btn {
+    padding: 5px 10px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #dee2e6;
+    background-color: transparent;
+    border: 1px solid #6c757d;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+#passkey-menu-btn:hover {
+    color: #fff;
+    background-color: #343a40;
+    border-color: #adb5bd;
+}
+
+#logout-btn {
+    padding: 6px 14px;
+    font-size: 14px;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+/* Responsive navigation */
+@media (max-width: 720px) {
+    .nav-container {
+        flex-wrap: wrap;
+        padding: 8px 0;
+        gap: 10px;
+    }
+
+    .nav-auth {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav-container {
+        gap: 8px;
+    }
+
+    .nav-brand {
+        font-size: 16px;
+    }
+
+    .nav-links {
+        gap: 4px;
+    }
+
+    .nav-link {
+        padding: 5px 8px;
+        font-size: 13px;
+    }
+
+    .nav-auth {
+        gap: 6px;
+    }
+
+    #current-user {
+        max-width: 120px;
+        font-size: 13px;
+    }
+
+    #passkey-menu-btn {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+
+    #logout-btn {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+}
+
+/*PASSKEY*/
+
+.passkey-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.passkey-modal.show {
+    display: flex;
+}
+
+.passkey-modal-content {
+    width: min(420px, calc(100% - 32px));
+
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 18px;
+
+    padding: 24px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    box-shadow: 0 20px 60px rgba(0,0,0,.45);
+}
+
+.passkey-modal-content h2 {
+    margin: 0;
+    color: white;
+    text-align: center;
+    font-size: 1.25rem;
+}
+
+
+.passkey-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.passkey-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    padding: 12px;
+
+    background: #27272a;
+    border: 1px solid #3f3f46;
+    border-radius: 12px;
+}
+
+.passkey-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.passkey-name {
+    color: white;
+    font-size: .95rem;
+    font-weight: 500;
+}
+
+.passkey-date {
+    margin-top: 3px;
+    color: #71717a;
+    font-size: .8rem;
+}
+
+.passkey-delete {
+    flex-shrink: 0;
+
+    padding: 7px 12px;
+
+    border: 1px solid #7f3030;
+    border-radius: 8px;
+
+    background: #3f2020;
+    color: #d87878;
+
+    cursor: pointer;
+
+    transition: all .2s ease;
+}
+
+.passkey-delete:hover {
+    background: #ef4444;
+    border-color: #ef4444;
+    color: white;
+}
+
+.passkey-cancel:focus-visible {
+    outline: 2px solid #0d6efd;
+    outline-offset: 3px;
+}
+
+.passkey-cancel {
+    padding: 8px;
+    color: #a1a1aa;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.passkey-cancel:hover {
+    color: #fff;
+}
+
+.passkey-provider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    width: 100%;
+    min-height: 52px;
+    padding: 12px;
+
+    color: #fff;
+    background: #27272a;
+    border: 1px solid #3f3f46;
+    border-radius: 10px;
+
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.passkey-provider img {
+    width: 22px;
+    height: 22px;
+}
+
+.passkey-provider:hover {
+    color: #111827;
+    background: #fff;
+}
+
+.passkey-provider:focus-visible{
+    outline: 2px solid #0d6efd;
+    outline-offset: 3px;
+}
+
+.passkey-empty-message{
+    color: #e66e6e;
+    text-align: center;
+}

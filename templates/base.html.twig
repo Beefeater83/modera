@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
         <title>{% block title %}Welcome!{% endblock %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        <link rel="stylesheet" href="{{ asset('css/base.css') }}">
         {% block stylesheets %}
         {% endblock %}
 
@@ -37,6 +38,12 @@
 
                     <div class="nav-auth">
                         <span id="current-user" hidden></span>
+
+                        <button type="button" class="btn btn-secondary"
+                                id="passkey-menu-btn" hidden>
+                            Passkey menu
+                        </button>
+
                         <button type="button" class="btn btn-primary"
                                 id="logout-btn" hidden>
                             Sign out
@@ -47,5 +54,21 @@
         {% endblock %}
 
         {% block body %}{% endblock %}
+        <div id="passkey-modal" class="passkey-modal" hidden>
+            <div class="passkey-modal-content">
+                <h2>Your Passkeys</h2>
+
+                <div id="passkey-list" class="passkey-list"></div>
+
+                <button type="button" class="passkey-provider" id="create-passkey-btn">
+                    <span>🔐</span>
+                    <span>Create new Passkey</span>
+                </button>
+
+                <button type="button" class="passkey-cancel" id="close-passkey-btn">
+                    Cancel
+                </button>
+            </div>
+        </div>
     </body>
 </html>
