@@ -1,29 +1,120 @@
+
 {% extends 'base.html.twig' %}
 
 {% block title %}Modera{% endblock %}
 
 {% block stylesheets %}
-    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="{{ asset('css/home.css') }}">
 {% endblock %}
 
 {% block body %}
-<div class="container">
-    <div class="home-hero">
-        <h1 class="home-title">Modera</h1>
+    <div class="container">
+        <div class="home-hero">
+            <h1 class="home-title">Modera</h1>
 
-        <!-- Image or animation placeholder area -->
-        <div class="home-media-placeholder">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-            </svg>
-            <div class="home-placeholder-text">Image / Animation Placeholder</div>
-            <div class="home-placeholder-subtext">Content will be added later</div>
-        </div>
+            <div class="home-actions">
+                <button type="button"
+                        class="btn btn-primary"
+                        id="authenticateBtn"
+                        hidden>
+                    Authenticate
+                </button>
+            </div>
 
-        <!-- Authenticate action placeholder -->
-        <div class="home-actions">
-            <button type="button" class="btn btn-primary" id="authenticateBtn">Authenticate</button>
+            <div id="auth-status"
+                 class="auth-status"
+                 role="status"
+                 aria-live="polite"
+                 hidden></div>
+
+            <div class="home-media-placeholder">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                </svg>
+                <div class="home-placeholder-text">
+                    Image / Animation Placeholder
+                </div>
+                <div class="home-placeholder-subtext">
+                    Content will be added later
+                </div>
+            </div>
         </div>
     </div>
-</div>
+
+    <div id="auth-modal" class="auth-modal" hidden>
+        <div class="auth-modal-content"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="auth-modal-title">
+
+            <h2 id="auth-modal-title">Choose authentication</h2>
+
+            <button type="button" class="auth-provider"
+                    id="google-login">
+                <img src="{{ asset('icons/google.svg') }}" alt="">
+                <span>Continue with Google</span>
+            </button>
+
+            <button type="button" class="auth-provider"
+                    id="github-login">
+                <img src="{{ asset('icons/github.svg') }}" alt="">
+                <span>Continue with GitHub</span>
+            </button>
+
+            <div class="auth-divider">
+                <span>or</span>
+            </div>
+
+            <div class="otp-login">
+                <h3>Sign in with one-time code</h3>
+
+                <form id="otp-request-form">
+                    <label for="otp-email" class="visually-hidden">
+                        Email address
+                    </label>
+
+                    <input
+                        id="otp-email"
+                        class="auth-input"
+                        type="email"
+                        placeholder="Email address"
+                        autocomplete="email"
+                        required
+                    >
+
+                    <button type="submit" class="auth-provider otp-btn" id="otp-request-btn">
+                        Send verification code
+                    </button>
+                </form>
+
+                <form id="otp-verify-form" hidden>
+                    <label for="otp-code" class="visually-hidden">
+                        Verification code
+                    </label>
+
+                    <input
+                        id="otp-code"
+                        class="auth-input"
+                        type="text"
+                        inputmode="numeric"
+                        pattern="[0-9]{6}"
+                        maxlength="6"
+                        autocomplete="one-time-code"
+                        placeholder="6-digit verification code"
+                        required
+                    >
+
+                    <button type="submit" class="auth-provider otp-btn" id="otp-verify-btn">
+                        Verify and sign in
+                    </button>
+                </form>
+
+                <div id="otp-message" class="otp-message"></div>
+            </div>
+
+            <button type="button" class="auth-cancel" id="auth-cancel">
+                Cancel
+            </button>
+        </div>
+    </div>
 {% endblock %}

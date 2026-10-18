@@ -3,14 +3,16 @@
 {% block title %}Invoices{% endblock %}
 
 {% block stylesheets %}
-    <link rel="stylesheet" href="/css/invoices.css">
+    <link rel="stylesheet" href="{{ asset('css/invoices.css') }}">
 {% endblock %}
 
 {% block body %}
 <div class="container">
     <div class="page-header">
         <h1 class="page-title">Invoices</h1>
+        {% if is_granted('ROLE_ADMIN') %}
         <button id="addInvoiceBtn" class="btn btn-primary" type="button">+ Add Invoice</button>
+        {% endif %}
     </div>
 
     <div id="globalAlert" class="alert alert-danger hidden"></div>
@@ -78,9 +80,6 @@
 
             <div class="detail-section-title">Invoice Details</div>
             <div class="property-list">
-                <div class="property-label">ID:</div>
-                <div class="property-value" id="viewId">—</div>
-
                 <div class="property-label">Invoice number:</div>
                 <div class="property-value" id="viewNumber">—</div>
 
@@ -134,8 +133,10 @@
             </div>
         </div>
         <div class="modal-footer">
+            {% if is_granted('ROLE_ADMIN') %}
             <button type="button" class="btn btn-secondary" id="viewModalEditBtn">Edit</button>
             <button type="button" class="btn btn-danger" id="viewModalDeleteBtn">Delete</button>
+            {% endif %}
             <button type="button" class="btn btn-secondary" id="viewModalCloseFooterBtn">Close</button>
         </div>
     </div>
@@ -518,7 +519,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentViewingInvoice = invoice;
 
             document.getElementById('viewModalTitle').textContent = `Invoice No. ${invoice.number || ''}`;
-            document.getElementById('viewId').textContent = formatValue(invoice.id);
+            //document.getElementById('viewId').textContent = formatValue(invoice.id);
             document.getElementById('viewNumber').textContent = formatValue(invoice.number);
             document.getElementById('viewStatus').innerHTML = renderStatusBadge(invoice.paidAt);
             document.getElementById('viewPaidAt').textContent = formatDate(invoice.paidAt);
@@ -719,7 +720,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Event listeners
-    document.getElementById('addInvoiceBtn').addEventListener('click', openAddModal);
+    document.getElementById('addInvoiceBtn')?.addEventListener('click', openAddModal);
 
     // Modal close buttons
     document.getElementById('viewModalCloseBtn').addEventListener('click', closeViewModal);
@@ -736,7 +737,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Actions inside view modal
-    document.getElementById('viewModalEditBtn').addEventListener('click', () => {
+    document.getElementById('viewModalEditBtn')?.addEventListener('click', () => {
         if (currentViewingInvoice) {
             const id = currentViewingInvoice.id;
             closeViewModal();
@@ -744,7 +745,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    document.getElementById('viewModalDeleteBtn').addEventListener('click', () => {
+    document.getElementById('viewModalDeleteBtn')?.addEventListener('click', () => {
         if (currentViewingInvoice) {
             deleteInvoice(currentViewingInvoice.id, currentViewingInvoice.number);
         }

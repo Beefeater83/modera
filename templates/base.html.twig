@@ -16,18 +16,34 @@
         <script src="https://cdn.jsdelivr.net/npm/idiomorph"></script>
         <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
         {% endif %}
+        <script src="{{ asset('js/auth.js') }}" defer></script>
     </head>
     <body>
         {% block navigation %}
-        <nav class="app-nav">
-            <div class="nav-container">
-                <a href="/" class="nav-brand">Modera Ukraine</a>
-                <div class="nav-links">
-                    <a href="/contracts" class="nav-link {% if app.request.pathInfo starts with '/contracts' %}active{% endif %}">Contracts</a>
-                    <a href="/invoices" class="nav-link {% if app.request.pathInfo starts with '/invoices' %}active{% endif %}">Invoices</a>
+            <nav class="app-nav">
+                <div class="nav-container">
+                    <a href="/" class="nav-brand">Modera Ukraine</a>
+
+                    <div class="nav-links" id="protected-nav" hidden>
+                        <a href="/contracts"
+                           class="nav-link {% if app.request.pathInfo starts with '/contracts' %}active{% endif %}">
+                            Contracts
+                        </a>
+                        <a href="/invoices"
+                           class="nav-link {% if app.request.pathInfo starts with '/invoices' %}active{% endif %}">
+                            Invoices
+                        </a>
+                    </div>
+
+                    <div class="nav-auth">
+                        <span id="current-user" hidden></span>
+                        <button type="button" class="btn btn-primary"
+                                id="logout-btn" hidden>
+                            Sign out
+                        </button>
+                    </div>
                 </div>
-            </div>
-        </nav>
+            </nav>
         {% endblock %}
 
         {% block body %}{% endblock %}

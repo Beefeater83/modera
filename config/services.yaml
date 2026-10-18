@@ -22,6 +22,10 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
+    App\Services\CookieService:
+        arguments:
+            $environment: '%kernel.environment%'
+
     App\ArgumentResolver\PageArgumentResolver:
         tags:
             - { name: controller.argument_value_resolver, priority: 50 }
@@ -37,3 +41,15 @@ services:
     App\EventListener\ApiExceptionListener:
         arguments:
             $debug: '%kernel.debug%'
+
+    App\Security\OAuthAuthenticator:
+        arguments:
+            $logger: '@monolog.logger.security'
+
+    App\Security\OtpAuthenticator:
+        arguments:
+            $logger: '@monolog.logger.security'
+
+    App\Services\OtpService:
+        arguments:
+            $logger: '@monolog.logger.security'

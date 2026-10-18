@@ -17,9 +17,11 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/contracts')]
+#[IsGranted('ROLE_USER')]
 class ContractController extends AbstractApiController
 {
     private ContractRepository $contractRepository;
@@ -55,6 +57,7 @@ class ContractController extends AbstractApiController
     }
 
     #[Route('', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function create(Request $request): JsonResponse
     {
         $payload = $this->getJsonPayload($request);
@@ -98,6 +101,7 @@ class ContractController extends AbstractApiController
     }
 
     #[Route('/{id}', requirements: ['id' => '\d+'], methods: ['PATCH'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function update(int $id, Request $request): JsonResponse
     {
         $contract = $this->contractRepository->getOrFail($id);
@@ -158,6 +162,7 @@ class ContractController extends AbstractApiController
     }
 
     #[Route('/{id}', requirements: ['id' => '\d+'], methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function delete(int $id): JsonResponse
     {
         $contract = $this->contractRepository->getOrFail($id);

@@ -37,6 +37,7 @@ body.modal-open {
     align-items: center;
     height: 54px;
     gap: 24px;
+    justify-content: space-between;
 }
 
 .nav-brand {
