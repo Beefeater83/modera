@@ -99,6 +99,8 @@ document.addEventListener('DOMContentLoaded', () => {
             sessionStorage.getItem('oauth_attempted') === '1';
         const otpLoginAttempted =
             sessionStorage.getItem('otp_login_success') === '1';
+        const passkeyLoginAttempted =
+            sessionStorage.getItem('passkey_login_attempted') === '1';
 
         try {
             const data = await getAuthState();
@@ -123,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 authenticateBtn.hidden = authenticated;
             }
 
-            if (oauthAttempted || otpLoginAttempted) {
+            if (oauthAttempted || otpLoginAttempted || passkeyLoginAttempted) {
                 if (authenticated) {
                     showStatus(
                         `You have successfully signed in${data.name ? `, ${data.name}` : ''}.`,
@@ -138,6 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 sessionStorage.removeItem('oauth_attempted');
                 sessionStorage.removeItem('otp_login_success');
+                sessionStorage.removeItem('passkey_login_attempted');
             }
         } catch (error) {
             console.error('Unable to check authentication:', error);
@@ -159,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 authenticateBtn.hidden = false;
             }
 
-            if (oauthAttempted || otpLoginAttempted) {
+            if (oauthAttempted || otpLoginAttempted || passkeyLoginAttempted) {
                 showStatus(
                     'Unable to verify sign-in. Please try again.',
                     'failure'
@@ -167,6 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 sessionStorage.removeItem('oauth_attempted');
                 sessionStorage.removeItem('otp_login_success');
+                sessionStorage.removeItem('passkey_login_attempted');
             }
         }
     }
@@ -195,6 +199,8 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionStorage.setItem('oauth_attempted', '1');
         window.location.href = '/api/connect/github';
     });
+
+    document.getElementById('passkey-login')?.addEventListener('click', loginWithPasskey);
 
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async () => {
@@ -400,4 +406,149 @@ if (otpVerifyForm) {
             );
         }
     });
+}
+
+//**************************PASSKEY************************/
+
+async function loginWithPasskey() {
+    const authStatus = document.getElementById('auth-status');
+
+    if (authStatus) {
+        authStatus.hidden = true;
+    }
+
+    try {
+        const response = await fetch(
+            '/api/iam/passkey/authentication/options',
+            {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json',
+                },
+            }
+        );
+
+        const options = await response.json();
+
+        if (!response.ok) {
+            showPasskeyError();
+            return;
+        }
+
+        const credential = await navigator.credentials.get({
+            publicKey: decodeAuthenticationOptions(options),
+        });
+
+        if (!credential) {
+            showPasskeyError();
+            return;
+        }
+
+        const verifyResponse = await fetch(
+            '/api/iam/passkey/authentication/verify',
+            {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    credential: encodeCredential(credential),
+                }),
+            }
+        );
+
+        if (!verifyResponse.ok) {
+            showPasskeyError();
+            return;
+        }
+
+        sessionStorage.setItem('passkey_login_attempted', '1');
+        sessionStorage.removeItem('oauth_attempted');
+        sessionStorage.removeItem('otp_login_success');
+
+        window.location.href = '/';
+    } catch (error) {
+        console.error('Passkey authentication failed:', error);
+
+        showPasskeyError();
+    }
+}
+
+function showPasskeyError() {
+    const authStatus = document.getElementById('auth-status');
+
+    if (!authStatus) {
+        return;
+    }
+
+    authStatus.textContent = 'Sign-in failed. Please try again.';
+    authStatus.className = 'auth-status failure';
+    authStatus.hidden = false;
+}
+
+function decodeAuthenticationOptions(options) {
+    options.challenge = base64urlToUint8Array(options.challenge);
+
+    if (options.allowCredentials) {
+        options.allowCredentials = options.allowCredentials.map(credential => ({
+            ...credential,
+            id: base64urlToUint8Array(credential.id),
+        }));
+    }
+
+    return options;
+}
+
+function encodeCredential(credential) {
+    return {
+        id: credential.id,
+        rawId: uint8ArrayToBase64url(
+            new Uint8Array(credential.rawId)
+        ),
+        type: credential.type,
+        response: {
+            clientDataJSON: uint8ArrayToBase64url(
+                new Uint8Array(credential.response.clientDataJSON)
+            ),
+            authenticatorData: uint8ArrayToBase64url(
+                new Uint8Array(credential.response.authenticatorData)
+            ),
+            signature: uint8ArrayToBase64url(
+                new Uint8Array(credential.response.signature)
+            ),
+            userHandle: credential.response.userHandle
+                ? uint8ArrayToBase64url(
+                    new Uint8Array(credential.response.userHandle)
+                )
+                : null,
+        },
+    };
+}
+
+function base64urlToUint8Array(base64url) {
+    const padding = '='.repeat((4 - base64url.length % 4) % 4);
+    const base64 = (base64url + padding)
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+
+    return Uint8Array.from(
+        atob(base64),
+        character => character.charCodeAt(0)
+    );
+}
+
+function uint8ArrayToBase64url(bytes) {
+    let binary = '';
+
+    bytes.forEach(byte => {
+        binary += String.fromCharCode(byte);
+    });
+
+    return btoa(binary)
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=/g, '');
 }
