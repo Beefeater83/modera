@@ -117,6 +117,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     : '';
             }
 
+            const passkeyMenuBtn = document.getElementById('passkey-menu-btn');
+
+            if (passkeyMenuBtn) {
+                passkeyMenuBtn.hidden = !authenticated;
+            }
+
             if (logoutBtn) {
                 logoutBtn.hidden = !authenticated;
             }
