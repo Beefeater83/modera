@@ -194,7 +194,7 @@ class PasskeyController extends AbstractController
         return $this->json($passkeys);
     }
 
-    #[Route('/iam/passkeys/{id}', name: 'api_passkey_delete', methods: ['DELETE'])]
+    #[Route('/api/iam/passkeys/{id}', name: 'api_passkey_delete', methods: ['DELETE'])]
     public function delete(int $id): JsonResponse
     {
         /** @var User|null $user */
