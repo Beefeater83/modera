@@ -13,10 +13,11 @@ class ContractWebController extends AbstractController
     #[Route('/contracts', name: 'app_contracts_web', methods: ['GET'])]
     public function index(): Response
     {
+        /*
         if (!$this->getUser()) {
             return $this->redirectToRoute('app_home');
         }
-
+        */
         return $this->render('contract/index.html.twig');
     }
 }
