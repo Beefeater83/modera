@@ -223,6 +223,57 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentViewingInvoice = null;
     let availableContracts = [];
 
+
+    let refreshPromise = null;
+
+    async function refreshAccessToken() {
+        if (!refreshPromise) {
+            refreshPromise = (async () => {
+                try {
+                    const response = await fetch('/api/refresh', {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: {
+                            Accept: 'application/json'
+                        }
+                    });
+
+                    return response.ok;
+                } catch (error) {
+                    console.error('Token refresh failed:', error);
+                    return false;
+                }
+            })().finally(() => {
+                refreshPromise = null;
+            });
+        }
+
+        return refreshPromise;
+    }
+
+    async function apiFetch(url, options = {}) {
+        const requestOptions = {
+            ...options,
+            credentials: 'same-origin'
+        };
+
+        let response = await fetch(url, requestOptions);
+
+        if (response.status !== 401) {
+            return response;
+        }
+
+        const refreshed = await refreshAccessToken();
+
+        if (!refreshed) {
+            return response;
+        }
+
+        // Retry the original request only once.
+        return await fetch(url, requestOptions);
+    }
+
+
     const invoicesContainer = document.getElementById('invoicesContainer');
     const globalAlert = document.getElementById('globalAlert');
 
@@ -349,7 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Preload contracts for form selection
     async function loadContractsOptions() {
         try {
-            const res = await fetch('/api/contracts?pageSize=100&sort=-issued');
+            const res = await apiFetch('/api/contracts?pageSize=100&sort=-issued');
             if (res.ok) {
                 const data = await res.json();
                 availableContracts = data.items || [];
@@ -455,7 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentPageSize === 'all') {
                 // Fetch first page with max allowed pageSize=100 to get total count.
                 const firstUrl = `/api/invoices?${baseParams}&page=1&pageSize=100`;
-                const firstRes = await fetch(firstUrl);
+                const firstRes = await apiFetch(firstUrl);
                 if (!firstRes.ok) {
                     const err = await firstRes.json().catch(() => ({}));
                     throw new Error(err.error || `HTTP ${firstRes.status}`);
@@ -473,7 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const results = await Promise.all(
                         pageNumbers.map(p =>
-                            fetch(`/api/invoices?${baseParams}&page=${p}&pageSize=100`)
+                            apiFetch(`/api/invoices?${baseParams}&page=${p}&pageSize=100`)
                                 .then(r => r.ok ? r.json() : Promise.reject(r.status))
                                 .then(d => d.items || [])
                         )
@@ -486,7 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 // Numeric page size: single request.
                 const url = `/api/invoices?${baseParams}&page=${currentPage}&pageSize=${currentPageSize}`;
-                const res = await fetch(url);
+                const res = await apiFetch(url);
                 if (!res.ok) {
                     const err = await res.json().catch(() => ({}));
                     throw new Error(err.error || `HTTP ${res.status}`);
@@ -509,7 +560,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('viewContractSubject').textContent = '—';
 
         try {
-            const invoiceRes = await fetch(`/api/invoices/${id}`);
+            const invoiceRes = await apiFetch(`/api/invoices/${id}`);
             if (!invoiceRes.ok) {
                 const err = await invoiceRes.json().catch(() => ({}));
                 throw new Error(err.error || 'Failed to load invoice details');
@@ -536,7 +587,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Fetch associated contract details
             if (invoice.contractId) {
-                fetch(`/api/contracts/${invoice.contractId}`)
+                apiFetch(`/api/contracts/${invoice.contractId}`)
                     .then(res => res.ok ? res.json() : null)
                     .then(contract => {
                         if (contract) {
@@ -586,7 +637,7 @@ document.addEventListener('DOMContentLoaded', () => {
         invoiceForm.reset();
 
         try {
-            const res = await fetch(`/api/invoices/${id}`);
+            const res = await apiFetch(`/api/invoices/${id}`);
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
                 throw new Error(err.error || 'Invoice not found');
@@ -659,7 +710,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const method = isEdit ? 'PATCH' : 'POST';
 
         try {
-            const res = await fetch(url, {
+            const res = await apiFetch(url, {
                 method: method,
                 headers: {
                     'Content-Type': 'application/json',
@@ -698,7 +749,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const res = await fetch(`/api/invoices/${id}`, {
+            const res = await apiFetch(`/api/invoices/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Accept': 'application/json'

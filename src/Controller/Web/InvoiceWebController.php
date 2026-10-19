@@ -13,10 +13,11 @@ class InvoiceWebController extends AbstractController
     #[Route('/invoices', name: 'app_invoices_web', methods: ['GET'])]
     public function index(): Response
     {
+        /*
         if (!$this->getUser()) {
             return $this->redirectToRoute('app_home');
         }
-
+        */
         return $this->render('invoice/index.html.twig');
     }
 }

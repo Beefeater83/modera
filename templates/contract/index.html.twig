@@ -176,6 +176,58 @@ document.addEventListener('DOMContentLoaded', () => {
     const contractForm = document.getElementById('contractForm');
     const viewModalAlert = document.getElementById('viewModalAlert');
 
+
+    // Refresh the access token when the API returns 401.
+    let refreshPromise = null;
+
+    async function refreshAccessToken() {
+        if (!refreshPromise) {
+            refreshPromise = (async () => {
+                try {
+                    const response = await fetch('/api/refresh', {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: {
+                            Accept: 'application/json'
+                        }
+                    });
+
+                    return response.ok;
+                } catch (error) {
+                    console.error('Token refresh failed:', error);
+                    return false;
+                }
+            })().finally(() => {
+                refreshPromise = null;
+            });
+        }
+
+        return refreshPromise;
+    }
+
+    async function apiFetch(url, options = {}) {
+        const requestOptions = {
+            ...options,
+            credentials: 'same-origin'
+        };
+
+        let response = await fetch(url, requestOptions);
+
+        if (response.status !== 401) {
+            return response;
+        }
+
+        const refreshed = await refreshAccessToken();
+
+        if (!refreshed) {
+            return response;
+        }
+
+        // Retry the original request once with the refreshed cookie.
+        return await fetch(url, requestOptions);
+    }
+
+
     function syncBodyScrollLock() {
         const isAnyModalOpen = !viewModalBackdrop.classList.contains('hidden') || !formModalBackdrop.classList.contains('hidden');
         if (isAnyModalOpen) {
@@ -266,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // Use existing API capabilities: default sort by -issued (from newest to oldest)
-            const response = await fetch('/api/contracts?sort=-issued&pageSize=100');
+            const response = await apiFetch('/api/contracts?sort=-issued&pageSize=100');
             if (!response.ok) {
                 const err = await response.json().catch(() => ({}));
                 throw new Error(err.error || `HTTP ${response.status}`);
@@ -315,8 +367,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const [contractRes, invoicesRes] = await Promise.all([
-                fetch(`/api/contracts/${id}`),
-                fetch(`/api/invoices?filter[contract][eq]=${id}&pageSize=1`)
+                apiFetch(`/api/contracts/${id}`),
+                apiFetch(`/api/invoices?filter[contract][eq]=${id}&pageSize=1`)
             ]);
 
             if (!contractRes.ok) {
@@ -375,7 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
         contractForm.reset();
 
         try {
-            const res = await fetch(`/api/contracts/${id}`);
+            const res = await apiFetch(`/api/contracts/${id}`);
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
                 throw new Error(err.error || 'Contract not found');
@@ -441,7 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const method = isEdit ? 'PATCH' : 'POST';
 
         try {
-            const res = await fetch(url, {
+            const res = await apiFetch(url, {
                 method: method,
                 headers: {
                     'Content-Type': 'application/json',
@@ -480,7 +532,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const res = await fetch(`/api/contracts/${id}`, {
+            const res = await apiFetch(`/api/contracts/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Accept': 'application/json'
