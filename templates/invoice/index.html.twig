@@ -728,14 +728,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('formModalCloseBtn').addEventListener('click', closeFormModal);
     document.getElementById('formModalCancelBtn').addEventListener('click', closeFormModal);
 
-    // Backdrop clicks
-    viewModalBackdrop.addEventListener('click', (e) => {
-        if (e.target === viewModalBackdrop) closeViewModal();
-    });
-    formModalBackdrop.addEventListener('click', (e) => {
-        if (e.target === formModalBackdrop) closeFormModal();
-    });
-
     // Actions inside view modal
     document.getElementById('viewModalEditBtn')?.addEventListener('click', () => {
         if (currentViewingInvoice) {
