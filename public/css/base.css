@@ -1,4 +1,9 @@
 /* Base page styles */
+
+:root {
+    --scrollbar-width: 0px;
+}
+
 * {
     box-sizing: border-box;
 }
@@ -172,57 +177,7 @@ body {
     white-space: nowrap;
 }
 
-/* Responsive navigation */
-@media (max-width: 720px) {
-    .nav-container {
-        flex-wrap: wrap;
-        padding: 8px 0;
-        gap: 10px;
-    }
-
-    .nav-auth {
-        width: 100%;
-        justify-content: flex-end;
-    }
-}
-
-@media (max-width: 480px) {
-    .nav-container {
-        gap: 8px;
-    }
-
-    .nav-brand {
-        font-size: 16px;
-    }
-
-    .nav-links {
-        gap: 4px;
-    }
-
-    .nav-link {
-        padding: 5px 8px;
-        font-size: 13px;
-    }
-
-    .nav-auth {
-        gap: 6px;
-    }
-
-    #current-user {
-        max-width: 120px;
-        font-size: 13px;
-    }
-
-    #passkey-menu-btn {
-        padding: 4px 8px;
-        font-size: 12px;
-    }
-
-    #logout-btn {
-        padding: 5px 10px;
-        font-size: 12px;
-    }
-}
+/* Responsive navigation: handled by mobile-nav.css (< 900 px) */
 
 /*PASSKEY*/
 

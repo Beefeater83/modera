@@ -1,3 +1,10 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   home.css — главная страница Modera Ukraine
+   Ориентир пропорций: MacBook M3 (~1440 × 900 viewport)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Body: фон главной страницы ────────────────────────────────────── */
+
 body {
     background:
         radial-gradient(
@@ -13,222 +20,51 @@ body {
         );
     color: #292D33;
     min-height: 100vh;
+    min-height: 100dvh; /* Учитывает динамическую высоту на мобильных */
 }
+
+/* ── Container: занимает доступную высоту за вычетом nav ────────────── */
+
+.container {
+    /* Переопределяем base.css: убираем фиксированные padding по вертикали
+       чтобы вертикальное выравнивание работало через flexbox */
+    padding: 0 16px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* ── home-hero: вертикальное центрирование ──────────────────────────── */
 
 .home-hero {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 5px 16px;
     max-width: 1200px;
     margin: 0 auto;
+
+    /* Занять доступную высоту viewport за вычетом десктопной навигации */
+    min-height: calc(100dvh - 54px);
+    justify-content: center;
+
+    /* Небольшие отступы чтобы контент дышал при малой высоте окна */
+    padding: 24px 0;
 }
 
-.home-visual {
-    display: grid;
-    grid-template-columns: 0.8fr 1.2fr;
-    align-items: center;
-    gap: 32px;
-    width: 100%;
-    min-width: 0;
-}
-
-.home-placeholder-text {
-    font-size: clamp(48px, 7vw, 100px);
-    font-weight: 600;
-    line-height: 1.1;
-    color: #315A85;
-    text-align: center;
-    overflow-wrap: anywhere;
-}
-
-.home-media-placeholder {
-    position: relative;
-    width: 100%;
-    min-width: 0;
-    height: clamp(360px, 42vw, 540px);
-    border: 0;
-    border-radius: 16px;
-    background: transparent;
-    box-shadow: none;
-    overflow: hidden;
-}
-
-.brand-scene {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    isolation: isolate;
-}
-
-.core-shadow {
-    position: absolute;
-    width: 20%;
-    height: 3%;
-    left: 40%;
-    top: 72%;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.30);
-    filter: blur(8px);
-    pointer-events: none;
-}
-
-.brand-core {
-    position: absolute;
-    width: 42%;
-    height: 42%;
-    object-fit: contain;
-    left: 29%;
-    top: 29%;
-    pointer-events: none;
-    user-select: none;
-    will-change: transform;
-    opacity: 0.8;
-    filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.20));
-}
-
-/* Логотипы: внешний контейнер */
-.brand-item {
-    position: absolute;
-    width: var(--size);
-    height: var(--size);
-    left: calc(50% - var(--size) / 2);
-    top: calc(50% - var(--size) / 2);
-    will-change: transform;
-    pointer-events: none;
-    user-select: none;
-}
-
-/* Изображение логотипа */
-.brand-item img {
-    position: relative;
-    z-index: 1;
-    display: block;
-    width: 100%;
-    height: 100%;
-    padding: 5px;
-    box-sizing: border-box;
-    object-fit: contain;
-}
-
-/* Размытая тень ниже логотипа */
-.brand-shadow {
-    position: absolute;
-    z-index: 0;
-    width: 65%;
-    height: 14%;
-    left: 17.5%;
-    bottom: -3px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.30);
-    filter: blur(6px);
-    transform: translateY(5px) scale(0.9);
-}
-
-/* Позиции логотипов на больших экранах */
-.brand-1  { --x: -155px; --y: -145px; --size: 72px; }
-.brand-2  { --x:   95px; --y: -155px; --size: 78px; }
-.brand-3  { --x:  155px; --y:  -25px; --size: 72px; }
-.brand-4  { --x:  115px; --y:  135px; --size: 66px; }
-.brand-5  { --x: -115px; --y:  140px; --size: 72px; }
-.brand-6  { --x: -180px; --y:   25px; --size: 77px; }
-.brand-7  { --x:  -25px; --y: -190px; --size: 72px; }
-.brand-8  { --x:  195px; --y:   75px; --size: 77px; }
-.brand-9  { --x: -205px; --y:  -90px; --size: 72px; }
-.brand-10 { --x:  -20px; --y:  195px; --size: 75px; }
-.brand-11 { --x:  185px; --y: -125px; --size: 70px; }
-
-/* Планшеты и узкие окна */
-@media (max-width: 999px) {
-    .home-visual {
-        grid-template-columns: 1fr;
-        gap: 0;
-    }
-
-    .home-placeholder-text {
-        font-size: clamp(36px, 5vw, 52px);
-        line-height: 1.1;
-        padding: 0;
-        margin: 20px;
-    }
-
-    .home-media-placeholder {
-        height: clamp(360px, 55vw, 520px);
-    }
-}
-
-/* Экраны до 799px */
-@media (max-width: 799px) {
+/* На мобильных navbar выше (52px) — учитываем */
+@media (max-width: 899px) {
     .home-hero {
-        padding: 0 12px;
-    }
-
-    .home-media-placeholder {
-        height: 360px;
-    }
-
-    .brand-1  { --x: -115px; --y: -75px;  --size: 44px; }
-    .brand-2  { --x:   45px; --y: -105px; --size: 42px; }
-    .brand-3  { --x:  125px; --y:  -10px; --size: 44px; }
-    .brand-4  { --x:   65px; --y:   85px; --size: 42px; }
-    .brand-5  { --x:  -65px; --y:   95px; --size: 44px; }
-    .brand-6  { --x: -105px; --y:   15px; --size: 40px; }
-    .brand-7  { --x:  -10px; --y: -100px; --size: 40px; }
-    .brand-8  { --x:  115px; --y:   55px; --size: 44px; }
-    .brand-9  { --x: -115px; --y:  -85px; --size: 44px; }
-    .brand-10 { --x:  -10px; --y:  110px; --size: 42px; }
-    .brand-11 { --x:  105px; --y: -100px; --size: 40px; }
-}
-
-/* Телефоны */
-@media (max-width: 599px) {
-    .home-placeholder-text {
-        font-size: 38px;
-        margin: 20px;
-    }
-
-    .home-media-placeholder {
-        height: 320px;
-    }
-
-    .brand-1  { --x: -80px; --y: -55px; --size: 36px; }
-    .brand-2  { --x:  30px; --y: -80px; --size: 36px; }
-    .brand-3  { --x:  85px; --y: -10px; --size: 36px; }
-    .brand-4  { --x:  50px; --y:  65px; --size: 36px; }
-    .brand-5  { --x: -45px; --y:  70px; --size: 36px; }
-    .brand-6  { --x: -80px; --y:  10px; --size: 36px; }
-    .brand-7  { --x:  -5px; --y: -75px; --size: 36px; }
-    .brand-8  { --x:  85px; --y:  45px; --size: 36px; }
-    .brand-9  { --x: -85px; --y: -60px; --size: 36px; }
-    .brand-10 { --x:  -5px; --y:  85px; --size: 36px; }
-    .brand-11 { --x:  75px; --y: -70px; --size: 36px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .brand-item,
-    .brand-core {
-        will-change: auto;
+        min-height: calc(100dvh - 52px);
+        padding: 20px 0;
     }
 }
 
-/* Action buttons */
-
-@media (max-width: 600px) {
-    .home-media-placeholder {
-        height: 220px;
-    }
-    .home-title {
-        font-size: 28px;
-    }
-}
-
-/* Authentication status */
+/* ── auth-status ────────────────────────────────────────────────────── */
 
 .auth-status {
     width: 100%;
     max-width: 640px;
-    margin: 16px 0 24px;
+    margin: 0 0 20px;
     padding: 12px 16px;
     border: 1px solid transparent;
     border-radius: 8px;
@@ -248,17 +84,299 @@ body {
     border-color: #f1aeb5;
 }
 
-/* Authentication modal */
+/* ── home-visual: двухколоночная сетка ─────────────────────────────── */
+
+.home-visual {
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    align-items: center;
+    gap: 32px;
+    width: 100%;
+    min-width: 0;
+}
+
+/* ── home-placeholder-text ──────────────────────────────────────────── */
+
+.home-placeholder-text {
+    font-size: clamp(52px, 6.5vw, 100px);
+    font-weight: 600;
+    line-height: 1.1;
+    color: #315A85;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+/* ── home-media-placeholder ─────────────────────────────────────────── */
+
+.home-media-placeholder {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    /* Высота масштабируется с шириной viewport, max не больше 560px */
+    height: clamp(360px, 40vw, 560px);
+    border: 0;
+    border-radius: 16px;
+    background: transparent;
+    box-shadow: none;
+    overflow: hidden;
+}
+
+/* ── brand-scene ────────────────────────────────────────────────────── */
+
+.brand-scene {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    isolation: isolate;
+}
+
+/* ── Core sphere shadow ─────────────────────────────────────────────── */
+
+.core-shadow {
+    position: absolute;
+    width: 20%;
+    height: 3%;
+    left: 40%;
+    top: 72%;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.30);
+    filter: blur(8px);
+    pointer-events: none;
+}
+
+/* ── Core sphere ────────────────────────────────────────────────────── */
+
+.brand-core {
+    position: absolute;
+    width: 42%;
+    height: 42%;
+    object-fit: contain;
+    left: 29%;
+    top: 29%;
+    pointer-events: none;
+    user-select: none;
+    will-change: transform;
+    opacity: 0.8;
+    filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.20));
+}
+
+/* ── Brand item: внешний контейнер логотипа ─────────────────────────── */
+
+.brand-item {
+    position: absolute;
+    width: var(--size);
+    height: var(--size);
+    left: calc(50% - var(--size) / 2);
+    top: calc(50% - var(--size) / 2);
+    will-change: transform;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* ── Изображение логотипа ───────────────────────────────────────────── */
+
+.brand-item img {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 5px;
+    box-sizing: border-box;
+    object-fit: contain;
+}
+
+/* ── Тень логотипа ──────────────────────────────────────────────────── */
+
+.brand-shadow {
+    position: absolute;
+    z-index: 0;
+    width: 65%;
+    height: 14%;
+    left: 17.5%;
+    bottom: -3px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.30);
+    filter: blur(6px);
+    transform: translateY(5px) scale(0.9);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ПОЗИЦИИ ЛОГОТИПОВ
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Базовые позиции (≥ 1000 px, горизонтальная компоновка) ─────────── */
+
+.brand-1  { --x: -155px; --y: -145px; --size: 72px; }
+.brand-2  { --x:   95px; --y: -155px; --size: 78px; }
+.brand-3  { --x:  155px; --y:  -25px; --size: 72px; }
+.brand-4  { --x:  115px; --y:  135px; --size: 66px; }
+.brand-5  { --x: -115px; --y:  140px; --size: 72px; }
+.brand-6  { --x: -180px; --y:   25px; --size: 77px; }
+.brand-7  { --x:  -25px; --y: -190px; --size: 72px; }
+.brand-8  { --x:  195px; --y:   75px; --size: 77px; }
+.brand-9  { --x: -205px; --y:  -90px; --size: 72px; }
+.brand-10 { --x:  -20px; --y:  195px; --size: 75px; }
+.brand-11 { --x:  185px; --y: -125px; --size: 70px; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   МЕДИАЗАПРОСЫ
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── ≥ 1400 px: большие мониторы — чуть крупнее, но с верхним ограничением */
+
+@media (min-width: 1400px) {
+    .home-placeholder-text {
+        font-size: clamp(80px, 6vw, 100px);
+    }
+
+    .home-media-placeholder {
+        height: clamp(480px, 38vw, 560px);
+    }
+
+    .brand-1  { --x: -165px; --y: -155px; --size: 80px; }
+    .brand-2  { --x:  105px; --y: -165px; --size: 86px; }
+    .brand-3  { --x:  165px; --y:  -28px; --size: 80px; }
+    .brand-4  { --x:  125px; --y:  148px; --size: 74px; }
+    .brand-5  { --x: -125px; --y:  152px; --size: 80px; }
+    .brand-6  { --x: -192px; --y:   28px; --size: 86px; }
+    .brand-7  { --x:  -28px; --y: -205px; --size: 80px; }
+    .brand-8  { --x:  210px; --y:   82px; --size: 86px; }
+    .brand-9  { --x: -220px; --y:  -98px; --size: 80px; }
+    .brand-10 { --x:  -22px; --y:  210px; --size: 83px; }
+    .brand-11 { --x:  198px; --y: -135px; --size: 78px; }
+}
+
+/* ── < 1000 px: вертикальная компоновка ─────────────────────────────── */
+
+@media (max-width: 999px) {
+    .home-visual {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .home-placeholder-text {
+        font-size: clamp(40px, 7vw, 64px);
+        line-height: 1.1;
+        padding: 0;
+        margin: 0;
+    }
+
+    .home-media-placeholder {
+        height: clamp(320px, 52vw, 480px);
+    }
+
+    /* Промежуточные позиции: между 800 и 999 */
+    .brand-1  { --x: -130px; --y: -110px; --size: 58px; }
+    .brand-2  { --x:   70px; --y: -130px; --size: 64px; }
+    .brand-3  { --x:  135px; --y:  -15px; --size: 58px; }
+    .brand-4  { --x:   90px; --y:  110px; --size: 54px; }
+    .brand-5  { --x:  -90px; --y:  115px; --size: 58px; }
+    .brand-6  { --x: -148px; --y:   20px; --size: 62px; }
+    .brand-7  { --x:  -18px; --y: -155px; --size: 58px; }
+    .brand-8  { --x:  158px; --y:   62px; --size: 62px; }
+    .brand-9  { --x: -165px; --y:  -72px; --size: 58px; }
+    .brand-10 { --x:  -15px; --y:  162px; --size: 60px; }
+    .brand-11 { --x:  148px; --y: -105px; --size: 56px; }
+}
+
+/* ── < 800 px: планшеты в портретной ориентации ─────────────────────── */
+
+@media (max-width: 799px) {
+    .home-hero {
+        padding: 16px 0;
+    }
+
+    .home-media-placeholder {
+        height: clamp(280px, 56vw, 380px);
+    }
+
+    .brand-1  { --x: -105px; --y: -88px;  --size: 46px; }
+    .brand-2  { --x:   52px; --y: -108px; --size: 50px; }
+    .brand-3  { --x:  115px; --y:  -12px; --size: 46px; }
+    .brand-4  { --x:   72px; --y:   90px; --size: 44px; }
+    .brand-5  { --x:  -72px; --y:   95px; --size: 46px; }
+    .brand-6  { --x: -118px; --y:   16px; --size: 50px; }
+    .brand-7  { --x:  -14px; --y: -125px; --size: 46px; }
+    .brand-8  { --x:  128px; --y:   50px; --size: 50px; }
+    .brand-9  { --x: -132px; --y:  -58px; --size: 46px; }
+    .brand-10 { --x:  -12px; --y:  130px; --size: 48px; }
+    .brand-11 { --x:  120px; --y:  -86px; --size: 44px; }
+}
+
+/* ── < 600 px: телефоны ─────────────────────────────────────────────── */
+
+@media (max-width: 599px) {
+    .home-hero {
+        padding: 12px 0;
+    }
+
+    .home-placeholder-text {
+        font-size: clamp(34px, 9vw, 48px);
+        margin: 0 0 4px;
+    }
+
+    .home-media-placeholder {
+        height: clamp(260px, 68vw, 340px);
+    }
+
+    .brand-1  { --x:  -82px; --y: -62px; --size: 36px; }
+    .brand-2  { --x:   38px; --y: -84px; --size: 38px; }
+    .brand-3  { --x:   88px; --y: -10px; --size: 36px; }
+    .brand-4  { --x:   54px; --y:  68px; --size: 36px; }
+    .brand-5  { --x:  -54px; --y:  72px; --size: 36px; }
+    .brand-6  { --x:  -90px; --y:  12px; --size: 38px; }
+    .brand-7  { --x:   -8px; --y: -95px; --size: 36px; }
+    .brand-8  { --x:   96px; --y:  44px; --size: 38px; }
+    .brand-9  { --x:  -98px; --y: -48px; --size: 36px; }
+    .brand-10 { --x:   -8px; --y:  98px; --size: 38px; }
+    .brand-11 { --x:   86px; --y: -76px; --size: 35px; }
+}
+
+/* ── < 400 px: узкие телефоны (iPhone SE и т.д.) ───────────────────── */
+
+@media (max-width: 399px) {
+    .home-placeholder-text {
+        font-size: clamp(28px, 9vw, 38px);
+    }
+
+    .home-media-placeholder {
+        height: clamp(240px, 70vw, 300px);
+    }
+
+    .brand-1  { --x:  -68px; --y: -52px; --size: 30px; }
+    .brand-2  { --x:   32px; --y: -70px; --size: 32px; }
+    .brand-3  { --x:   74px; --y:  -8px; --size: 30px; }
+    .brand-4  { --x:   46px; --y:  56px; --size: 30px; }
+    .brand-5  { --x:  -44px; --y:  60px; --size: 30px; }
+    .brand-6  { --x:  -76px; --y:  10px; --size: 32px; }
+    .brand-7  { --x:   -6px; --y: -78px; --size: 30px; }
+    .brand-8  { --x:   80px; --y:  36px; --size: 32px; }
+    .brand-9  { --x:  -82px; --y: -40px; --size: 30px; }
+    .brand-10 { --x:   -6px; --y:  82px; --size: 32px; }
+    .brand-11 { --x:   72px; --y: -64px; --size: 29px; }
+}
+
+/* ── prefers-reduced-motion ─────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+    .brand-item,
+    .brand-core {
+        will-change: auto;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AUTHENTICATION MODAL
+   ═══════════════════════════════════════════════════════════════════════ */
 
 .auth-modal {
     position: fixed;
     inset: 0;
     z-index: 1000;
-
     display: none;
     justify-content: center;
     align-items: center;
-
     padding: 16px;
     background: rgba(0, 0, 0, 0.55);
 }
@@ -271,10 +389,10 @@ body {
     display: flex;
     flex-direction: column;
     gap: 16px;
-
     width: min(420px, 100%);
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
     padding: 24px;
-
     background: #18181b;
     border: 1px solid #27272a;
     border-radius: 18px;
@@ -293,20 +411,16 @@ body {
     align-items: center;
     justify-content: center;
     gap: 12px;
-
     width: 100%;
     min-height: 52px;
     padding: 12px;
-
     color: #fff;
     background: #27272a;
     border: 1px solid #3f3f46;
     border-radius: 10px;
-
     font-size: 15px;
     font-weight: 500;
     cursor: pointer;
-
     transition: background-color 0.2s, color 0.2s;
 }
 
@@ -338,7 +452,8 @@ body {
     color: #fff;
 }
 
-/*OTP*/
+/* ── OTP ────────────────────────────────────────────────────────────── */
+
 .auth-divider {
     display: flex;
     align-items: center;
@@ -427,6 +542,8 @@ body {
     color: #f87171;
 }
 
+/* ── Visually hidden ────────────────────────────────────────────────── */
+
 .visually-hidden {
     position: absolute;
     width: 1px;
@@ -438,6 +555,8 @@ body {
     white-space: nowrap;
     border: 0;
 }
+
+/* ── OTP verify form animation ──────────────────────────────────────── */
 
 @keyframes fadeOtp {
     from {
