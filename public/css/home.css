@@ -1,57 +1,215 @@
-/* Homepage Hero Section */
+body {
+    background:
+        radial-gradient(
+            ellipse at 72% 35%,
+            rgba(255, 255, 255, 0.85),
+            transparent 48%
+        ),
+        linear-gradient(
+            135deg,
+            #E8EAED 0%,
+            #F4F5F6 50%,
+            #E6E8EB 100%
+        );
+    color: #292D33;
+    min-height: 100vh;
+}
+
 .home-hero {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 40px 16px;
-    max-width: 860px;
+    padding: 5px 16px;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
-.home-title {
-    margin: 0 0 24px 0;
-    font-size: 36px;
-    font-weight: 700;
-    color: #212529;
-    letter-spacing: -0.5px;
-}
-
-/* Placeholder for image or animation */
-.home-media-placeholder {
-    width: 100%;
-    max-width: 640px;
-    height: 320px;
-    border: 2px dashed #ced4da;
-    border-radius: 8px;
-    background-color: #ffffff;
-    display: flex;
-    flex-direction: column;
+.home-visual {
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
     align-items: center;
-    justify-content: center;
-    margin-bottom: 32px;
-    color: #6c757d;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    padding: 20px;
-}
-
-.home-media-placeholder svg {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 12px;
-    fill: #adb5bd;
+    gap: 32px;
+    width: 100%;
+    min-width: 0;
 }
 
 .home-placeholder-text {
-    font-size: 16px;
-    font-weight: 500;
-    color: #495057;
-    margin-bottom: 4px;
+    font-size: clamp(48px, 7vw, 100px);
+    font-weight: 600;
+    line-height: 1.1;
+    color: #315A85;
+    text-align: center;
+    overflow-wrap: anywhere;
 }
 
-.home-placeholder-subtext {
-    font-size: 13px;
-    color: #6c757d;
+.home-media-placeholder {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    height: clamp(360px, 42vw, 540px);
+    border: 0;
+    border-radius: 16px;
+    background: transparent;
+    box-shadow: none;
+    overflow: hidden;
+}
+
+.brand-scene {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    isolation: isolate;
+}
+
+.core-shadow {
+    position: absolute;
+    width: 20%;
+    height: 3%;
+    left: 40%;
+    top: 72%;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.30);
+    filter: blur(8px);
+    pointer-events: none;
+}
+
+.brand-core {
+    position: absolute;
+    width: 42%;
+    height: 42%;
+    object-fit: contain;
+    left: 29%;
+    top: 29%;
+    pointer-events: none;
+    user-select: none;
+    will-change: transform;
+    opacity: 0.8;
+    filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.20));
+}
+
+/* Логотипы: внешний контейнер */
+.brand-item {
+    position: absolute;
+    width: var(--size);
+    height: var(--size);
+    left: calc(50% - var(--size) / 2);
+    top: calc(50% - var(--size) / 2);
+    will-change: transform;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* Изображение логотипа */
+.brand-item img {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 5px;
+    box-sizing: border-box;
+    object-fit: contain;
+}
+
+/* Размытая тень ниже логотипа */
+.brand-shadow {
+    position: absolute;
+    z-index: 0;
+    width: 65%;
+    height: 14%;
+    left: 17.5%;
+    bottom: -3px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.30);
+    filter: blur(6px);
+    transform: translateY(5px) scale(0.9);
+}
+
+/* Позиции логотипов на больших экранах */
+.brand-1  { --x: -155px; --y: -145px; --size: 72px; }
+.brand-2  { --x:   95px; --y: -155px; --size: 78px; }
+.brand-3  { --x:  155px; --y:  -25px; --size: 72px; }
+.brand-4  { --x:  115px; --y:  135px; --size: 66px; }
+.brand-5  { --x: -115px; --y:  140px; --size: 72px; }
+.brand-6  { --x: -180px; --y:   25px; --size: 77px; }
+.brand-7  { --x:  -25px; --y: -190px; --size: 72px; }
+.brand-8  { --x:  195px; --y:   75px; --size: 77px; }
+.brand-9  { --x: -205px; --y:  -90px; --size: 72px; }
+.brand-10 { --x:  -20px; --y:  195px; --size: 75px; }
+.brand-11 { --x:  185px; --y: -125px; --size: 70px; }
+
+/* Планшеты и узкие окна */
+@media (max-width: 999px) {
+    .home-visual {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .home-placeholder-text {
+        font-size: clamp(36px, 5vw, 52px);
+        line-height: 1.1;
+        padding: 0;
+        margin: 20px;
+    }
+
+    .home-media-placeholder {
+        height: clamp(360px, 55vw, 520px);
+    }
+}
+
+/* Экраны до 799px */
+@media (max-width: 799px) {
+    .home-hero {
+        padding: 0 12px;
+    }
+
+    .home-media-placeholder {
+        height: 360px;
+    }
+
+    .brand-1  { --x: -115px; --y: -75px;  --size: 44px; }
+    .brand-2  { --x:   45px; --y: -105px; --size: 42px; }
+    .brand-3  { --x:  125px; --y:  -10px; --size: 44px; }
+    .brand-4  { --x:   65px; --y:   85px; --size: 42px; }
+    .brand-5  { --x:  -65px; --y:   95px; --size: 44px; }
+    .brand-6  { --x: -105px; --y:   15px; --size: 40px; }
+    .brand-7  { --x:  -10px; --y: -100px; --size: 40px; }
+    .brand-8  { --x:  115px; --y:   55px; --size: 44px; }
+    .brand-9  { --x: -115px; --y:  -85px; --size: 44px; }
+    .brand-10 { --x:  -10px; --y:  110px; --size: 42px; }
+    .brand-11 { --x:  105px; --y: -100px; --size: 40px; }
+}
+
+/* Телефоны */
+@media (max-width: 599px) {
+    .home-placeholder-text {
+        font-size: 38px;
+        margin: 20px;
+    }
+
+    .home-media-placeholder {
+        height: 320px;
+    }
+
+    .brand-1  { --x: -80px; --y: -55px; --size: 36px; }
+    .brand-2  { --x:  30px; --y: -80px; --size: 36px; }
+    .brand-3  { --x:  85px; --y: -10px; --size: 36px; }
+    .brand-4  { --x:  50px; --y:  65px; --size: 36px; }
+    .brand-5  { --x: -45px; --y:  70px; --size: 36px; }
+    .brand-6  { --x: -80px; --y:  10px; --size: 36px; }
+    .brand-7  { --x:  -5px; --y: -75px; --size: 36px; }
+    .brand-8  { --x:  85px; --y:  45px; --size: 36px; }
+    .brand-9  { --x: -85px; --y: -60px; --size: 36px; }
+    .brand-10 { --x:  -5px; --y:  85px; --size: 36px; }
+    .brand-11 { --x:  75px; --y: -70px; --size: 36px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .brand-item,
+    .brand-core {
+        will-change: auto;
+    }
 }
 
 /* Action buttons */
