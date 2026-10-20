@@ -90,6 +90,11 @@ body {
     letter-spacing: 0.5px;
     white-space: nowrap;
     flex-shrink: 0;
+    transition: color 0.15s ease;
+}
+
+.nav-brand:hover {
+    color: #B8D5F2;
 }
 
 .nav-links {
