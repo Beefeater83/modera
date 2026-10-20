@@ -213,16 +213,6 @@ body {
 }
 
 /* Action buttons */
-.home-actions {
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-}
-
-.home-actions .btn {
-    padding: 10px 24px;
-    font-size: 15px;
-}
 
 @media (max-width: 600px) {
     .home-media-placeholder {
@@ -256,10 +246,6 @@ body {
     color: #842029;
     background: #f8d7da;
     border-color: #f1aeb5;
-}
-
-.home-actions {
-    margin-bottom: 4px;
 }
 
 /* Authentication modal */

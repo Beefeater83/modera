@@ -36,13 +36,13 @@ body.modal-open {
 
 .btn-primary {
     color: #fff;
-    background-color: #0d6efd;
-    border-color: #0d6efd;
+    background-color: #477DB3;
+    border-color: #477DB3;
 }
 
 .btn-primary:hover {
-    background-color: #0b5ed7;
-    border-color: #0a58ca;
+    background-color: #386A9C;
+    border-color: #386A9C;
 }
 
 .btn-secondary {
