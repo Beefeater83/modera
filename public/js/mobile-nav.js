@@ -106,7 +106,6 @@
         if (desktopProtectedNav && mobProtectedNav) {
             const authenticated = !desktopProtectedNav.hidden;
             mobProtectedNav.hidden = !authenticated;
-            if (mobAuthDivider) mobAuthDivider.hidden = !authenticated;
         }
 
         // current-user
@@ -192,11 +191,6 @@
         link.addEventListener('click', () => closeSidebar());
     });
 
-    // Клик по лого внутри sidebar тоже закрывает меню
-    sidebar.querySelector('.sidebar-brand')?.addEventListener('click', () => {
-        closeSidebar();
-    });
-
     // ── Обработчики открытия/закрытия ───────────────────────────────────
 
     hamburgerBtn.addEventListener('click', () => {
@@ -236,8 +230,8 @@
         // Если горизонтальный свайп больше вертикального — это не прокрутка
         // страницы, разрешаем событие, но sidebar уже заблокирован телом
         if (dx > dy && dx > 10) {
-            // При свайпе влево от открытого sidebar — закрываем
-            if (event.touches[0].clientX - touchStartX < -40) {
+            // При свайпе вправо от открытого справа sidebar — закрываем
+            if (event.touches[0].clientX - touchStartX > 40) {
                 closeSidebar();
             }
         }

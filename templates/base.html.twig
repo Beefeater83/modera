@@ -88,7 +88,6 @@
                  aria-hidden="true">
 
                 <div class="sidebar-header">
-                    <a href="/" class="nav-brand sidebar-brand">Modera Ukraine</a>
                     <button
                         class="sidebar-close"
                         id="sidebar-close-btn"
@@ -98,18 +97,25 @@
                     </button>
                 </div>
 
-                <div class="sidebar-links" id="mob-protected-nav" hidden>
-                    <a href="/contracts"
-                       class="sidebar-link {% if app.request.pathInfo starts with '/contracts' %}active{% endif %}">
-                        Contracts
+                <div class="sidebar-links">
+                    <a href="/"
+                       class="sidebar-link {% if app.request.pathInfo == '/' %}active{% endif %}">
+                        Homepage
                     </a>
-                    <a href="/invoices"
-                       class="sidebar-link {% if app.request.pathInfo starts with '/invoices' %}active{% endif %}">
-                        Invoices
-                    </a>
+
+                    <div class="sidebar-protected-links" id="mob-protected-nav" hidden>
+                        <a href="/contracts"
+                           class="sidebar-link {% if app.request.pathInfo starts with '/contracts' %}active{% endif %}">
+                            Contracts
+                        </a>
+                        <a href="/invoices"
+                           class="sidebar-link {% if app.request.pathInfo starts with '/invoices' %}active{% endif %}">
+                            Invoices
+                        </a>
+                    </div>
                 </div>
 
-                <div class="sidebar-divider" id="mob-auth-divider" hidden></div>
+                <div class="sidebar-divider" id="mob-auth-divider"></div>
 
                 <div class="sidebar-auth">
                     <span id="mob-current-user" hidden></span>
