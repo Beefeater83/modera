@@ -18,6 +18,7 @@
         <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
         {% endif %}
         <script src="{{ asset('js/auth.js') }}" defer></script>
+        <script src="{{ asset('js/brand-parallax.js') }}" defer></script>
     </head>
     <body>
         {% block navigation %}
@@ -42,6 +43,11 @@
                         <button type="button" class="btn btn-secondary"
                                 id="passkey-menu-btn" hidden>
                             Passkey menu
+                        </button>
+
+                        <button type="button" class="btn btn-primary"
+                                id="authenticateBtn" hidden>
+                            Authenticate
                         </button>
 
                         <button type="button" class="btn btn-primary"
