@@ -112,6 +112,12 @@ class PasskeyService
         $item->expiresAfter(120);
         $this->cache->save($item);
 
+        $this->logger->info('Passkey registration challenge cached', [
+            'user_id' => $user->getId(),
+            'cache_key' => $cacheKey,
+            'saved' => $this->cache->hasItem($cacheKey),
+        ]);
+
         return $options;
     }
 
@@ -127,6 +133,13 @@ class PasskeyService
     ): Passkey {
         $cacheKey = 'passkey_reg_options_user_' . $user->getId();
         $item = $this->cache->getItem($cacheKey);
+
+        $this->logger->info('Passkey registration challenge lookup', [
+            'user_id' => $user->getId(),
+            'cache_key' => $cacheKey,
+            'hit' => $item->isHit(),
+        ]);
+
         if (!$item->isHit()) {
             throw new PasskeyValidationException('Registration challenge expired or invalid');
         }
@@ -180,7 +193,7 @@ class PasskeyService
         }
 
         $client = $this->detectClient($userAgent);
-        $name ??= $client['os'] . ' · ' . $client['browser'];
+        $name = $customName ?? ($client['os'] . ' · ' . $client['browser']);
 
         $passkey = $this->credentialMapper->fromCredentialRecord($credentialRecord, $user, $name);
         $this->entityManager->persist($passkey);
