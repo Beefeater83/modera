@@ -1,7 +1,3 @@
-/* ═══════════════════════════════════════════════════════════════════════
-   home.css — главная страница Modera Ukraine
-   Ориентир пропорций: MacBook M3 (~1440 × 900 viewport)
-   ═══════════════════════════════════════════════════════════════════════ */
 
 /* ── Body: фон главной страницы ────────────────────────────────────── */
 
@@ -320,17 +316,17 @@ body {
         height: clamp(260px, 68vw, 340px);
     }
 
-    .brand-1  { --x:  -82px; --y: -62px; --size: 36px; }
-    .brand-2  { --x:   38px; --y: -84px; --size: 38px; }
-    .brand-3  { --x:   88px; --y: -10px; --size: 36px; }
-    .brand-4  { --x:   54px; --y:  68px; --size: 36px; }
-    .brand-5  { --x:  -54px; --y:  72px; --size: 36px; }
-    .brand-6  { --x:  -90px; --y:  12px; --size: 38px; }
-    .brand-7  { --x:   -8px; --y: -95px; --size: 36px; }
-    .brand-8  { --x:   96px; --y:  44px; --size: 38px; }
-    .brand-9  { --x:  -98px; --y: -48px; --size: 36px; }
-    .brand-10 { --x:   -8px; --y:  98px; --size: 38px; }
-    .brand-11 { --x:   86px; --y: -76px; --size: 35px; }
+    .brand-1  { --x:  -62px; --y:  -82px; --size: 51px; }
+    .brand-2  { --x:   38px; --y:  -89px; --size: 55px; }
+    .brand-3  { --x:   100px; --y:  -10px; --size: 51px; }
+    .brand-4  { --x:   54px; --y:   88px; --size: 48px; }
+    .brand-5  { --x:  -74px; --y:   72px; --size: 51px; }
+    .brand-6  { --x:  -90px; --y:   12px; --size: 55px; }
+    .brand-7  { --x:   -8px; --y:  -95px; --size: 51px; }
+    .brand-8  { --x:   96px; --y:   44px; --size: 55px; }
+    .brand-9  { --x:  -98px; --y:  -48px; --size: 51px; }
+    .brand-10 { --x:   -8px; --y:   98px; --size: 53px; }
+    .brand-11 { --x:   86px; --y:  -76px; --size: 48px; }
 }
 
 /* ── < 400 px: узкие телефоны (iPhone SE и т.д.) ───────────────────── */
@@ -344,17 +340,17 @@ body {
         height: clamp(240px, 70vw, 300px);
     }
 
-    .brand-1  { --x:  -68px; --y: -52px; --size: 30px; }
-    .brand-2  { --x:   32px; --y: -70px; --size: 32px; }
-    .brand-3  { --x:   74px; --y:  -8px; --size: 30px; }
-    .brand-4  { --x:   46px; --y:  56px; --size: 30px; }
-    .brand-5  { --x:  -44px; --y:  60px; --size: 30px; }
-    .brand-6  { --x:  -76px; --y:  10px; --size: 32px; }
-    .brand-7  { --x:   -6px; --y: -78px; --size: 30px; }
-    .brand-8  { --x:   80px; --y:  36px; --size: 32px; }
-    .brand-9  { --x:  -82px; --y: -40px; --size: 30px; }
-    .brand-10 { --x:   -6px; --y:  82px; --size: 32px; }
-    .brand-11 { --x:   72px; --y: -64px; --size: 29px; }
+    .brand-1  { --x:  -68px; --y: -68px; --size: 46px; }
+    .brand-2  { --x:   32px; --y: -80px; --size: 50px; }
+    .brand-3  { --x:   94px; --y:  -8px; --size: 46px; }
+    .brand-4  { --x:   46px; --y:  86px; --size: 44px; }
+    .brand-5  { --x:  -74px; --y:  60px; --size: 46px; }
+    .brand-6  { --x:  -90px; --y:  10px; --size: 50px; }
+    .brand-7  { --x:   -6px; --y: -88px; --size: 46px; }
+    .brand-8  { --x:   85px; --y:  36px; --size: 50px; }
+    .brand-9  { --x:  -82px; --y: -40px; --size: 46px; }
+    .brand-10 { --x:   -6px; --y:  90px; --size: 48px; }
+    .brand-11 { --x:   72px; --y: -64px; --size: 44px; }
 }
 
 /* ── prefers-reduced-motion ─────────────────────────────────────────── */

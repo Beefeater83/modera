@@ -1,7 +1,3 @@
-/* ═══════════════════════════════════════════════════════════════════════
-   mobile-nav.css — мобильная навигация (< 900 px)
-   Десктопная .app-nav скрывается, показывается .mobile-header + sidebar
-   ═══════════════════════════════════════════════════════════════════════ */
 
 /* ── Скрытие/показ по умолчанию ─────────────────────────────────────── */
 
@@ -242,7 +238,7 @@
 
     .sidebar-link.active {
         color: #fff;
-        background-color: #477DB3;
+        background-color: #263F60;
         font-weight: 600;
     }
 
@@ -301,8 +297,8 @@
 
     .btn-primary-sidebar {
         color: #fff;
-        background-color: #477DB3;
-        border-color: #477DB3;
+        background-color: #263F60;
+        border-color: #263F60;
     }
 
     .btn-primary-sidebar:hover {
