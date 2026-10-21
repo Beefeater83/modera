@@ -30,9 +30,9 @@
         <div class="toolbar-section pagination-nav">
             <label class="field-label" for="pageSizeSelect">Per page:</label>
             <select id="pageSizeSelect" class="form-control form-control-sm">
-                <option value="all" selected>All</option>
+                <option value="all">All</option>
                 <option value="25">25</option>
-                <option value="50">50</option>
+                <option value="50" selected>50</option>
                 <option value="100">100</option>
             </select>
             <button id="prevPageBtn" class="btn btn-secondary btn-sm" disabled>&laquo; Prev</button>
@@ -426,7 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Pagination state ---
     let currentPage = 1;
-    let currentPageSize = 'all'; // 'all' | 25 | 50 | 100
+    let currentPageSize = 50; // 'all' | 25 | 50 | 100
     let filterFrom = '';
     let filterTo = '';
     let totalItems = 0;
