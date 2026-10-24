@@ -40,11 +40,7 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('composer.lock') }}
       -
         name: Install dependencies
-        uses: php-actions/composer@v6
-        with:
-          working_dir: .
-          #php_extensions to ignore
-          args: --ignore-platform-req=ext-gd  --ignore-platform-req=ext-zip
+        run: composer install --no-interaction --prefer-dist --no-progress --ignore-platform-req=ext-gd --ignore-platform-req=ext-zip
       -
         name: run tests
         working-directory: .
