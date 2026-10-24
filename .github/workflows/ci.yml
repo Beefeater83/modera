@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Allow dubious git ownership
+        run: git config --global --add safe.directory /app/backend
 
       - uses: actions/checkout@v4
 
