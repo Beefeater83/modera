@@ -14,15 +14,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Allow dubious git ownership
-        run: git config --global --add safe.directory /app/backend
-
       - uses: actions/checkout@v4
+
+      -   name: Allow dubious git ownership
+          run: git config --global --add safe.directory /app/backend
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
+          extensions: bcmath, pdo_sqlite
 
       -
         name: Create .env
