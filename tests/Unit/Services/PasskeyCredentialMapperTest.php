@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Services;
 
-use App\Entity\Passkey;
 use App\Entity\User;
 use App\Services\PasskeyCredentialMapper;
 use ParagonIE\ConstantTime\Base64UrlSafe;

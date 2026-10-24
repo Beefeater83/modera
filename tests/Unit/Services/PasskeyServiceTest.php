@@ -6,14 +6,11 @@ namespace App\Tests\Unit\Services;
 
 use App\Entity\Passkey;
 use App\Entity\User;
-use App\Exception\DuplicatePasskeyException;
-use App\Exception\PasskeyNotFoundException;
 use App\Exception\PasskeyValidationException;
 use App\Repository\PasskeyRepository;
 use App\Repository\UserRepository;
 use App\Services\PasskeyCredentialMapper;
 use App\Services\PasskeyService;
-use Beefeater\CrudEventBundle\Exception\ResourceNotFoundException;
 use Doctrine\ORM\EntityManagerInterface;
 use ParagonIE\ConstantTime\Base64UrlSafe;
 use PHPUnit\Framework\TestCase;
@@ -48,7 +45,7 @@ class PasskeyServiceTest extends TestCase
             new NullLogger(),
             'localhost',
             'Security',
-            ['http://localhost', 'http://localhost:3000']
+            ['http://localhost', 'http://localhost:8000']
         );
     }
 
@@ -141,7 +138,7 @@ class PasskeyServiceTest extends TestCase
         $ref->setValue($user, 1);
 
         $cacheItem = $this->createMock(CacheItemInterface::class);
-        $cacheItem->expects($this->once())->method('isHit')->willReturn(false);
+        $cacheItem->expects($this->exactly(2))->method('isHit')->willReturn(false);
 
         $this->cache
             ->expects($this->once())

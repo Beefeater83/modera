@@ -5,6 +5,7 @@
     "prefer-stable": true,
     "require": {
         "php": "8.4.*",
+        "ext-bcmath": "*",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "doctrine/doctrine-bundle": "^3.3",
@@ -68,6 +69,7 @@
             "cache:clear": "symfony-cmd",
             "assets:install %PUBLIC_DIR%": "symfony-cmd"
         },
+        "tests": "phpunit --testsuite=unit-tests",
         "post-install-cmd": [
             "@auto-scripts"
         ],
