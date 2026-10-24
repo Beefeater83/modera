@@ -1,0 +1,47 @@
+name: Build Status
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        types: [ opened, synchronize ]
+
+env:
+    DATABASE_URL: sqlite:///%kernel.project_dir%/var/test.db
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Allow dubious git ownership
+        run: git config --global --add safe.directory /app
+
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: bcmath, pdo_sqlite
+
+      -
+        name: Create .env
+        run: |
+          echo "APP_ENV=test" > .env
+          echo "APP_SECRET=ci_secret" >> .env
+          echo "DATABASE_URL=sqlite:///%kernel.project_dir%/var/test.db" >> .env
+          echo "DEFAULT_URI=http://localhost" >> .env
+      -
+        name: Cache Composer dependencies between workflows
+        uses: actions/cache@v3
+        with:
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-${{ hashFiles('composer.lock') }}
+      -
+        name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress --ignore-platform-req=ext-gd --ignore-platform-req=ext-zip
+      -
+        name: run tests
+        working-directory: .
+        run: composer tests
