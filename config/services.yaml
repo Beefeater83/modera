@@ -12,7 +12,7 @@ parameters:
     passkey_origins: '%env(default:default_passkey_origins:PASSKEY_ORIGINS)%'
     default_passkey_rp_id: 'localhost'
     default_passkey_rp_name: 'Security'
-    default_passkey_origins: 'http://localhost,http://localhost:8000,http://localhost:5173,http://127.0.0.1,http://127.0.0.1:8000,http://127.0.0.1:5173,https://modera.diakonov-it.com.ua'
+    default_passkey_origins: 'https://modera.diakonov-it.com.ua,http://localhost,http://localhost:8000'
 
 
 services:
